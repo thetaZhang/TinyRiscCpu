@@ -2,7 +2,7 @@
 
 module RegFile #(
   parameter integer ADDR_WIDTH = 5,
-  parameter integer DATA_WIDTH = 64
+  parameter integer DATA_WIDTH = 32
 ) (
   input clk,
   input rst_n,
@@ -32,8 +32,8 @@ generate
   end
 endgenerate
 
-DffNegRst #(DATA_WIDTH) u_reg_rd_1 (clk, rst_n, reg_file[addr_rd_1], data_rd_1);
-DffNegRst #(DATA_WIDTH) u_reg_rd_2 (clk, rst_n, reg_file[addr_rd_2], data_rd_2);
+assign data_rd_1 = reg_file[addr_rd_1];
+assign data_rd_2 = reg_file[addr_rd_2];
 
 
 endmodule

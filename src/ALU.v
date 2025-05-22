@@ -15,6 +15,7 @@ module ALU #(
     output overflow
 );
 
+// ALUopcpde
 localparam integer ADD = 4'b0000;
 localparam integer SUB = 4'b0001;
 localparam integer AND = 4'b0010;
