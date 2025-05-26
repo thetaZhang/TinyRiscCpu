@@ -32,6 +32,7 @@ module Controler #(
     output [ALU_OP_WIDTH - 1 : 0] alu_op,
     output [PC_SEL_WIDTH - 1 : 0] PC_sel,
     output alu_src,
+    output alu_zero_preset,
     output is_reg_write,
     output is_mem_to_reg
 );
@@ -69,7 +70,10 @@ assign alu_op = ((inst_in & `R_TYPE_MASK) == `INST_ADD) ? `ALU_ADD :
                 ((inst_in & `I_TYPE_MASK) == `INST_LW) ? `ALU_ADD :
                 ((inst_in & `B_TYPE_MASK) == `INST_BLT) ? `ALU_LT  :
                 ((inst_in & `B_TYPE_MASK) == `INST_BEQ) ? `ALU_SUB :
-                ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? `ALU_ADD :
-                ((inst_in & `S_TYPE_MASK) == `INST_SW) ? `ALU_ADD : 4'b0;
+                ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? `ALU_NONE :
+                ((inst_in & `S_TYPE_MASK) == `INST_SW) ? `ALU_ADD : `ALU_NONE;
+
+assign alu_zero_preset = ((inst_in & `B_TYPE_MASK) == `INST_BEQ) ? 1'b1 :
+                         ((inst_in & `B_TYPE_MASK) == `INST_BLT) ? 1'b0 : 1'b0;
 
 endmodule

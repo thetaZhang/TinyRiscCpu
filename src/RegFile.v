@@ -7,6 +7,7 @@ module RegFile #(
   input clk,
   input rst_n,
 
+  input reg_we_in,
   input [ADDR_WIDTH - 1 : 0] addr_wr,
   input [DATA_WIDTH - 1 : 0] data_wr,
 
@@ -28,7 +29,7 @@ generate
   for (i = 1; i < REG_FILE_SIZE; i = i + 1) begin : gen_reg
     wire [DATA_WIDTH - 1 : 0] reg_file_in;
     assign reg_file_in = (i == addr_wr) ? data_wr : reg_file[i];
-    DffNegRst #(DATA_WIDTH) u_reg (clk, rst_n, reg_file_in, reg_file[i]);
+    DffNegRstEn #(DATA_WIDTH) u_reg (clk, rst_n, reg_we_in, reg_file_in, reg_file[i]);
   end
 endgenerate
 

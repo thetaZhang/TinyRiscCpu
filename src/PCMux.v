@@ -8,12 +8,17 @@ module PCMux #(
   input [1 : 0] PC_src_ctrl, // 00: PC+4, 01: branch target; 10: jalr
   input is_branch,
   input [DATA_WIDTH - 1 : 0] offset_in,
+  output [DATA_WIDTH - 1 : 0] PC_save_out,
   output [ADDR_WIDTH - 1 : 0] PC_next
 );
 
-assign PC_next = (PC_src_ctrl == `PC_PLUS4) ? PC_in + 4 :
+wire [ADDR_WIDTH - 1 : 0] PC_plus4;
+assign PC_plus4 = PC_in + 4;
+assign PC_save_out = PC_plus4;
+
+assign PC_next = (PC_src_ctrl == `PC_PLUS4) ? PC_plus4 :
                  ((PC_src_ctrl == `PC_BRANCH) && is_branch) ? (PC_in + offset_in) :
-                 (PC_src_ctrl == `PC_JUMP) ? offset_in : PC_in + 4;
+                 (PC_src_ctrl == `PC_JUMP) ? offset_in : PC_plus4;
 
 endmodule
 

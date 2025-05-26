@@ -19,6 +19,7 @@ assign U_imm = {inst_in[31:12], 12'b0};
 assign UJ_imm = {{12{inst_in[31]}}, inst_in[19:12], inst_in[20], inst_in[30:21], 1'b0};
 
 assign imm_out = ((inst_in & `I_TYPE_MASK) == `INST_ADDI ) ? I_imm  :
+                 ((inst_in & `I_TYPE_MASK) == `INST_LW   ) ? I_imm  :
                  ((inst_in & `S_TYPE_MASK) == `INST_SW   ) ? S_imm  :
                  ((inst_in & `B_TYPE_MASK) == `INST_BLT  ) ? SB_imm :
                  ((inst_in & `B_TYPE_MASK) == `INST_BEQ  ) ? SB_imm :

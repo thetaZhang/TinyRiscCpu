@@ -16,22 +16,26 @@ module ALU #(
 );
 
 // ALUopcpde
-localparam integer ADD = 4'b0000;
-localparam integer SUB = 4'b0001;
-localparam integer AND = 4'b0010;
-localparam integer OR  = 4'b0011;
-localparam integer XOR = 4'b0100;
-localparam integer LT = 4'b0101;
-localparam integer NE = 4'b0110;
-localparam integer LTU = 4'b0111;
+localparam integer NONE = `ALU_NONE;
+localparam integer ADD = `ALU_ADD;
+localparam integer SUB = `ALU_SUB;
+localparam integer AND = `ALU_AND;
+localparam integer OR  = `ALU_OR;
+localparam integer XOR = `ALU_XOR;
+localparam integer SLL = `ALU_SLL;
+localparam integer SRL = `ALU_SRL;
+localparam integer LT  = `ALU_LT;
+localparam integer LTU = `ALU_LTU;
 
-
+localparam integer NE  = `ALU_NE;
 
 
 wire [DATA_WIDTH - 1 : 0] res_add_sub;
 wire [DATA_WIDTH - 1 : 0] res_and;
 wire [DATA_WIDTH - 1 : 0] res_or;
 wire [DATA_WIDTH - 1 : 0] res_xor;
+wire [DATA_WIDTH - 1 : 0] res_sll;
+wire [DATA_WIDTH - 1 : 0] res_srl;
 
 wire inv_1;
 wire inv_2;
@@ -51,8 +55,10 @@ assign {carry, res_add_sub} = in_1 + in_2;
 assign res_and = in_1 & in_2;
 assign res_or = in_1 | in_2;
 assign res_xor = in_1 ^ in_2;
+assign res_sll = in_1 << in_2[4:0];
+assign res_srl = in_1 >> in_2[4:0];
 
-assign zero = ~(|res_add_sub);
+
 assign overflow = (in_1[DATA_WIDTH - 1] == in_2[DATA_WIDTH - 1]) && (res_add_sub[DATA_WIDTH - 1] != in_1[DATA_WIDTH - 1]);
 
 assign less_than = (data_in_2 == {1'b1,{(DATA_WIDTH - 1){1'b0}}}) ? 1'b0 :
@@ -64,7 +70,11 @@ assign data_out = (op_ctrl == ADD) ? res_add_sub :
                   (op_ctrl == AND) ? res_and :
                   (op_ctrl == OR)  ? res_or :
                   (op_ctrl == XOR) ? res_xor :
+                  (op_ctrl == SLL) ? res_sll :
+                  (op_ctrl == SRL) ? res_srl :
                   (op_ctrl == LT)  ? {{(DATA_WIDTH - 1){1'b0}}, (less_than)} :
                   (op_ctrl == LTU) ? {{(DATA_WIDTH - 1){1'b0}}, (less_than_unsigned)} : 0;
+
+assign zero = ~(|data_out);
 
 endmodule
