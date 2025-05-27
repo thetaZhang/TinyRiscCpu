@@ -80,8 +80,8 @@ module tinyrisc_top (
   );
 
   // MEM
-  assign data_addr_out = ex_data_out[`ADDR_WIDTH : 0];
-  assign data_wr_out   = imm;
+  assign data_addr_out = ex_data_out[`ADDR_WIDTH - 1 : 0];
+  assign data_wr_out   = rs2_data;
   assign mem_data_out  = data_rd_in;
 
   // WB

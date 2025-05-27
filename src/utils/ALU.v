@@ -10,9 +10,7 @@ module ALU #(
 
     output [DATA_WIDTH - 1 : 0] data_out,
 
-    output zero,
-    output carry,
-    output overflow
+    output zero
 );
 
 // ALUopcpde
@@ -26,6 +24,9 @@ localparam integer SLL = `ALU_SLL;
 localparam integer SRL = `ALU_SRL;
 localparam integer LT  = `ALU_LT;
 localparam integer LTU = `ALU_LTU;
+
+wire carry;
+wire overflow;
 
 
 wire [DATA_WIDTH - 1 : 0] res_add_sub;
