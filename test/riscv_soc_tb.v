@@ -4,18 +4,17 @@ module riscv_soc_tb();
 
   reg     clk;
   reg     rst;
-  
-       
+
   initial begin
     clk = 1'b0;
     forever #50 clk = ~clk;
   end
       
   initial begin
-            rst = 1'b1;
-    #300    rst= 1'b0;
+    rst = 1'b1;
+    #300 rst= 1'b0;
     #100000 $display("---     result is %d         ---\n", verify);
-	#1000   $stop;   
+    #1000 $finish;
   end
        
   wire[31:0] inst_addr;
@@ -60,5 +59,10 @@ module riscv_soc_tb();
 		.data_o(rdata),
 		.verify(verify)
 	);
+
+  initial begin
+    $dumpfile("riscv_soc_tb.vcd");
+    $dumpvars(0, riscv_soc_tb);
+  end
 
 endmodule

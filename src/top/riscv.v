@@ -19,6 +19,25 @@ module riscv(
 
 //  instance your module  below
 
+wire rst_n;
+assign rst_n = ~rst;
+
+tinyrisc_top tinyrisc_top_inst(
+    .clk(clk),
+    .rst_n(rst_n),
+    
+    // inst_mem
+    .inst_in(inst_i),
+    .inst_addr_out(inst_addr_o),
+    .inst_ce_out(inst_ce_o),
+
+    // data_mem
+    .data_rd_in(data_i),
+    .data_we_out(data_we_o),
+    .data_ce_out(data_ce_o),
+    .data_addr_out(data_addr_o),
+    .data_wr_out(data_o)
+);
 
 
 

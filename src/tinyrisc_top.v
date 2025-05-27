@@ -1,21 +1,21 @@
 // top of the tinyrisc CPU
 
 module tinyrisc_top (
-    input                    clk,
-    input                    rst_n,
-    input  [`INST_WIDTH : 0] inst_in,
-    output [`ADDR_WIDTH : 0] inst_addr_out,
-    output                   inst_ce_out,
+    input                        clk,
+    input                        rst_n,
+    input  [`INST_WIDTH - 1 : 0] inst_in,
+    output [`ADDR_WIDTH - 1 : 0] inst_addr_out,
+    output                       inst_ce_out,
 
     input  [`DATA_WIDTH - 1 : 0] data_rd_in,
-    output [    `ADDR_WIDTH : 0] data_addr_out,
+    output [`ADDR_WIDTH - 1 : 0] data_addr_out,
     output [`DATA_WIDTH - 1 : 0] data_wr_out,
     output                       data_we_out,
     output                       data_ce_out
 );
 
-  wire [      `ADDR_WIDTH : 0] pc;
-  wire [      `ADDR_WIDTH : 0] pc_next;
+  wire [  `ADDR_WIDTH - 1 : 0] pc;
+  wire [  `ADDR_WIDTH - 1 : 0] pc_next;
   wire [`PC_SEL_WIDTH - 1 : 0] pc_sel;
   wire [`ALU_OP_WIDTH - 1 : 0] alu_op;
   wire                         alu_zero_preset;
@@ -81,11 +81,11 @@ module tinyrisc_top (
 
   // MEM
   assign data_addr_out = ex_data_out[`ADDR_WIDTH : 0];
-  assign data_wr_out      = imm;
-  assign mem_data_out = data_rd_in;
+  assign data_wr_out   = imm;
+  assign mem_data_out  = data_rd_in;
 
   // WB
-  assign rd_data = mem_to_reg ? mem_data_out : ex_data_out;
+  assign rd_data       = mem_to_reg ? mem_data_out : ex_data_out;
 
 
 endmodule

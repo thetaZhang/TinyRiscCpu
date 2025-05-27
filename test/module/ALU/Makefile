@@ -2,7 +2,8 @@
 # defaults
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
-VERILOG_SOURCES += $(PWD)/../../../src/ALU.v
+VERILOG_SOURCES += $(PWD)/../../../src/GlobalDefine.v
+VERILOG_SOURCES += $(PWD)/../../../src/utils/ALU.v
 # use VHDL_SOURCES for VHDL files
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 TOPLEVEL = ALU

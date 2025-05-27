@@ -27,8 +27,6 @@ localparam integer SRL = `ALU_SRL;
 localparam integer LT  = `ALU_LT;
 localparam integer LTU = `ALU_LTU;
 
-localparam integer NE  = `ALU_NE;
-
 
 wire [DATA_WIDTH - 1 : 0] res_add_sub;
 wire [DATA_WIDTH - 1 : 0] res_and;
@@ -46,7 +44,7 @@ wire [DATA_WIDTH - 1 : 0] in_2;
 wire less_than;
 wire less_than_unsigned;
 
-assign inv_2 = ((op_ctrl == SUB) || (op_ctrl == LT) || (op_ctrl == NE) || (op_ctrl == LTU)) ? 1'b1 : 1'b0;
+assign inv_2 = ((op_ctrl == SUB) || (op_ctrl == LT) || (op_ctrl == LTU)) ? 1'b1 : 1'b0;
 
 assign in_1 = data_in_1;
 assign in_2 = (inv_2) ? (~data_in_2 + 1'b1) : data_in_2;

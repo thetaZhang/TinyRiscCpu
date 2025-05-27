@@ -1,5 +1,4 @@
 // immediate number generator
-`include "GlobalDefine.v"
 module ImmGen #(
     parameter INST_WIDTH = 32,
     parameter IMM_WIDTH = 32

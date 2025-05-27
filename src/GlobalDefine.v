@@ -52,3 +52,14 @@
 `define PC_PLUS4 2'b00
 `define PC_BRANCH 2'b01
 `define PC_JUMP 2'b10
+`define PC_JUMP_R 2'b11
+
+
+// test data path
+`ifndef TEST_DATA_PATH
+  `define TEST_DATA_PATH "test/data/data_mem.txt"
+`endif
+
+`ifndef TEST_INST_PATH
+  `define TEST_INST_PATH "test/data/machinecode.txt"
+`endif

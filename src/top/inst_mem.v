@@ -6,7 +6,7 @@ module inst_mem(
 
 	reg[31:0]  inst_memory[0:1000];
 
-	initial $readmemh("./machinecode.txt", inst_memory);
+	initial $readmemh(`TEST_INST_PATH, inst_memory);
 
 	always @ * begin
 		if (ce == 1'b0) begin

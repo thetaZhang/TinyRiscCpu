@@ -3,8 +3,8 @@
 module tinyrisc_IF (
   input clk,
   input rst_n,
-  input [`ADDR_WIDTH : 0] pc_in,
-  output [`ADDR_WIDTH : 0] pc_out
+  input [`ADDR_WIDTH - 1 : 0] pc_in,
+  output [`ADDR_WIDTH - 1 : 0] pc_out
 );
 
 
