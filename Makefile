@@ -1,5 +1,12 @@
 SIMULATOR ?= iverilog
 
+
+VERILOG_SRC += $(wildcard $(PWD)/src/*.v)
+VERILOG_SRC += $(wildcard $(PWD)/src/*/*.v)
+TEST_SRC += $(wildcard $(PWD)/test/riscv_soc_tb.v)
+TOP = riscv_soc_tb
+
+
 ifeq ($(SIMULATOR), iverilog)
     SIM_CMD = iverilog
     SIM_RUN = vvp
@@ -10,16 +17,11 @@ else ifeq ($(SIMULATOR), questa)
     SIM_RUN = vsim
     COMPILE_ARGS = -work $(QS_LIB_DIR) +define+TEST_DATA_PATH=\"$(DATA_PATH)\" +define+TEST_INST_PATH=\"$(INST_PATH)\"
     SIM_ARGS = -c -voptargs=+acc -l $(BUILD_DIR)/transcript -do "run -all;" $(TOP)
-		SIM_WAVE_ARGS = -voptargs=+acc -l $(BUILD_DIR)/transcript -wlf $(QS_OUTPUT_DIR)/$(TOP).wlf -do "log -r /*;run -all;" $(TOP)
+		SIM_WAVE_ARGS = -voptargs=+acc -l $(BUILD_DIR)/transcript -wlf $(BUILD_DIR)/$(TOP).wlf -do "log -r /*;run -all;" $(TOP)
 else
     $(error simulator do not exist: $(SIMULATOR))
 endif
 
-
-VERILOG_SRC += $(wildcard $(PWD)/src/*.v)
-VERILOG_SRC += $(wildcard $(PWD)/src/*/*.v)
-TEST_SRC += $(wildcard $(PWD)/test/riscv_soc_tb.v)
-TOP = riscv_soc_tb
 
 
 ifeq ($(SIMULATOR), iverilog)
