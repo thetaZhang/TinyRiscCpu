@@ -13,7 +13,7 @@
 
 // opcodes
 `define INST_ADD 32'h33
-`define INST_ADDI 32'h7013
+`define INST_ADDI 32'h13
 `define INST_SUB 32'h40000033
 `define INST_AND 32'h7033
 `define INST_OR 32'h6033

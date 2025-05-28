@@ -18,7 +18,8 @@ assign PC_save_out = PC_plus4;
 
 assign PC_next = (PC_src_ctrl == `PC_PLUS4) ? PC_plus4 :
                  ((PC_src_ctrl == `PC_BRANCH) && is_branch) ? (PC_in + offset_in) :
-                 (PC_src_ctrl == `PC_JUMP) ? offset_in : PC_plus4;
+                 (PC_src_ctrl == `PC_JUMP) ? PC_in + offset_in :
+                 (PC_src_ctrl == `PC_JUMP_R) ? offset_in : PC_plus4;
 
 endmodule
 

@@ -24,13 +24,9 @@ endif
 
 
 
-ifeq ($(SIMULATOR), iverilog)
-DATA_PATH ?= ../test/data/data_mem.txt
-INST_PATH ?= ../test/data/machinecode.txt
-else ifeq ($(SIMULATOR), questa)
+
 DATA_PATH ?= test/data/data_mem.txt
 INST_PATH ?= test/data/machinecode.txt
-endif
 
 
 BUILD_DIR = build
@@ -67,26 +63,31 @@ init:
 	vmap work $(QS_LIB_DIR)
 endif
 
-com: $(BIN)
+$(INST_PATH):
+	cd test/assembler && ./assembler_linux
+	cp test/assembler/machinecode.txt $(INST_PATH) -f
+
+com: $(BIN) $(INST_PATH)
 
 
 ifeq ($(SIMULATOR), iverilog)
-sim: $(BIN)
-	cd $(BUILD_DIR) && $(SIM_RUN) $(TOP).vvp $(SIM_RUN_ARGS)
+sim: $(BIN) $(INST_PATH)
+	$(SIM_RUN) $(BUILD_DIR)/$(TOP).vvp $(SIM_RUN_ARGS)
 else ifeq ($(SIMULATOR), questa)
-sim: $(BIN)
+sim: $(BIN) $(INST_PATH)
 	$(SIM_RUN) $(SIM_ARGS)
 endif
 
 
 ifeq ($(SIMULATOR), iverilog)
-wave: $(BIN)
-	cd $(BUILD_DIR) && $(SIM_RUN) $(TOP).vvp $(SIM_RUN_ARGS);
+wave: $(BIN) $(INST_PATH)
+	$(SIM_RUN) $(BUILD_DIR)/$(TOP).vvp $(SIM_RUN_ARGS);
 	gtkwave $(BUILD_DIR)/$(TOP).vcd;
 else ifeq ($(SIMULATOR), questa)
-wave: $(BIN)
+wave: $(BIN) $(INST_PATH)
 	$(SIM_RUN) $(SIM_WAVE_ARGS)
 endif
 
 clean:
 	rm -f  $(BUILD_DIR)/*
+	rm test/data/machinecode.txt
