@@ -6,25 +6,28 @@ module tinyrisc_ID (
 
     input [`INST_WIDTH - 1 : 0] inst_in,
 
-    output [`DATA_WIDTH - 1 : 0] imm_out,
-    output [`DATA_WIDTH - 1 : 0] rs1_data_out,
-    output [`DATA_WIDTH - 1 : 0] rs2_data_out,
-    input  [`DATA_WIDTH - 1 : 0] rd_data_in,
+    output [    `DATA_WIDTH - 1 : 0] imm_out,
+    output [    `DATA_WIDTH - 1 : 0] rs1_data_out,
+    output [    `DATA_WIDTH - 1 : 0] rs2_data_out,
+    input  [    `DATA_WIDTH - 1 : 0] rd_data_in,
+    input  [`REG_ADDR_WIDTH - 1 : 0] rd_addr_in,
+    input                             reg_we_in,
+    output                            reg_we_out,
 
-    output [`ALU_OP_WIDTH - 1 : 0] alu_op_out,
-    output [`PC_SEL_WIDTH - 1 : 0] pc_sel_out,
-    output                         alu_src_out,
-    output                         data_we_out,
-    output                         data_ce_out,
-    output                         mem_to_reg_out,
-    output                         alu_zero_preset
+    output [  `ALU_OP_WIDTH - 1 : 0] alu_op_out,
+    output [  `PC_SEL_WIDTH - 1 : 0] pc_sel_out,
+    output                           alu_src_out,
+    output                           data_we_out,
+    output                           data_ce_out,
+    output                           mem_to_reg_out,
+    output                           alu_zero_preset,
+    output [`REG_ADDR_WIDTH - 1 : 0] rd_addr_out
 
 );
 
   wire [`REG_ADDR_WIDTH - 1 : 0] rs1_addr;
   wire [`REG_ADDR_WIDTH - 1 : 0] rs2_addr;
-  wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr;
-  wire                           reg_we;
+  
   wire                           mem_read;
   wire                           mem_write;
 
@@ -44,7 +47,7 @@ module tinyrisc_ID (
       .inst_in (inst_in),
       .rs1_addr(rs1_addr),
       .rs2_addr(rs2_addr),
-      .rd_addr (rd_addr)
+      .rd_addr (rd_addr_out)
   );
 
   RegFile #(
@@ -54,8 +57,8 @@ module tinyrisc_ID (
       .clk  (clk),
       .rst_n(rst_n),
 
-      .reg_we_in(reg_we),
-      .addr_wr  (rd_addr),
+      .reg_we_in(reg_we_in),
+      .addr_wr  (rd_addr_in),
       .data_wr  (rd_data_in),
 
       .addr_rd_1(rs1_addr),
@@ -78,7 +81,7 @@ module tinyrisc_ID (
       .PC_sel         (pc_sel_out),
       .alu_src        (alu_src_out),
       .alu_zero_preset(alu_zero_preset),
-      .is_reg_write   (reg_we),
+      .is_reg_write   (reg_we_out),
       .is_mem_to_reg  (mem_to_reg_out)
   );
 

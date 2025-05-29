@@ -25,10 +25,11 @@
 `define INST_SRL 32'h5033
 `define INST_LW 32'h2003
 `define INST_SW 32'h2023
+`define INST_JALR 32'h67
 
 // ALU input B src
-`define ALU_SRC_IMM 1'b0
-`define ALU_SRC_REG 1'b1
+`define ALU_SRC_IMM 1'b1
+`define ALU_SRC_REG 1'b0
 
 //ALUopcodes
 `define ALU_OP_WIDTH 4

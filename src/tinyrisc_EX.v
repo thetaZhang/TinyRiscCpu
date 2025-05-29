@@ -13,14 +13,14 @@ module tinyrisc_EX (
     output [  `DATA_WIDTH - 1 : 0] ex_data_out,
     input  [`PC_SEL_WIDTH - 1 : 0] pc_sel_in,
     input  [  `ADDR_WIDTH - 1 : 0] pc_in,
-    output [  `ADDR_WIDTH - 1 : 0] pc_out
+    output [  `ADDR_WIDTH - 1 : 0] pc_out,
+    output                         is_branch
 );
 
   wire [`DATA_WIDTH - 1 : 0] rs2_data;
   wire                       alu_zero;
   wire [`DATA_WIDTH - 1 : 0] alu_data_out;
 
-  wire                       is_branch;
   wire [`DATA_WIDTH - 1 : 0] pc_offset;
   wire [`ADDR_WIDTH - 1 : 0] pc_save;
 
@@ -40,7 +40,10 @@ module tinyrisc_EX (
 
 
   //PC gen
-  assign is_branch = (alu_zero == alu_zero_preset);
+  assign is_branch = (pc_sel_in == ``PC_JUMP) ||
+                     (pc_sel_in == `PC_JUMP_R) ||
+                     ((pc_sel_in == `PC_BRANCH) && (alu_zero == alu_zero_preset));
+
   assign pc_offset = (pc_sel_in == `PC_JUMP_R) ? alu_data_out : imm_in;
 
   PCMux #(
@@ -48,8 +51,7 @@ module tinyrisc_EX (
       .DATA_WIDTH(`DATA_WIDTH)
   ) pc_mux_u (
       .PC_in      (pc_in),
-      .PC_src_ctrl(pc_sel_in),  // Assuming alu_op_in[1:0] is used for PC selection
-      .is_branch  (is_branch),
+      .PC_src_ctrl(pc_sel_in),
       .offset_in  (pc_offset),
       .PC_save_out(pc_save),
       .PC_next    (pc_out)

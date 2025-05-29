@@ -4,10 +4,14 @@ module tinyrisc_IF (
   input clk,
   input rst_n,
   input [`ADDR_WIDTH - 1 : 0] pc_in,
+  input pc_branch,
   output [`ADDR_WIDTH - 1 : 0] pc_out
 );
 
+wire [`ADDR_WIDTH - 1 : 0] pc_next;
 
-DffNegRst #(`ADDR_WIDTH) pc_reg_u (clk, rst_n, pc_in, pc_out);
+assign pc_next = (pc_branch) ? pc_in : pc_out + 4;
+
+DffNegRst #(`ADDR_WIDTH) pc_reg_u (clk, rst_n, pc_next, pc_out);
 
 endmodule

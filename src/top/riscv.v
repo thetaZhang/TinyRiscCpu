@@ -32,11 +32,11 @@ tinyrisc_top tinyrisc_top_inst(
     .inst_ce_out(inst_ce_o),
 
     // data_mem
-    .data_rd_in(data_i),
+    .data_read_in(data_i),
     .data_we_out(data_we_o),
     .data_ce_out(data_ce_o),
     .data_addr_out(data_addr_o),
-    .data_wr_out(data_o)
+    .data_write_out(data_o)
 );
 
 
