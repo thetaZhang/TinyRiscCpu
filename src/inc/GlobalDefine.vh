@@ -122,6 +122,10 @@
 `define EX_FWD_MEM  2'b01
 `define EX_FWD_WB   2'b10
 
+// MEM in forwarding
+`define MEM_FWD_NONE   2'b00
+`define MEM_FWD_WB    2'b01
+
 // test data path
 `ifndef TEST_DATA_PATH
   `define TEST_DATA_PATH "test/data/data_mem.txt"
