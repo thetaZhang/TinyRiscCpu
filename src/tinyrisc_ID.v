@@ -11,14 +11,15 @@ module tinyrisc_ID (
     output [    `DATA_WIDTH - 1 : 0] rs2_data_out,
     input  [    `DATA_WIDTH - 1 : 0] rd_data_in,
     input  [`REG_ADDR_WIDTH - 1 : 0] rd_addr_in,
-    input                             reg_we_in,
-    output                            reg_we_out,
+    input                            reg_we_in,
+    output                           reg_we_out,
 
     output [  `ALU_OP_WIDTH - 1 : 0] alu_op_out,
     output [  `PC_SEL_WIDTH - 1 : 0] pc_sel_out,
-    output                           alu_src_out,
+    output [ `ALU_SRC_WIDTH - 1 : 0] alu_src_out,
     output                           data_we_out,
     output                           data_ce_out,
+    output [`MEM_MODE_WIDTH - 1 : 0] mem_width_out,
     output                           mem_to_reg_out,
     output                           alu_zero_preset,
     output [`REG_ADDR_WIDTH - 1 : 0] rd_addr_out
@@ -27,7 +28,7 @@ module tinyrisc_ID (
 
   wire [`REG_ADDR_WIDTH - 1 : 0] rs1_addr;
   wire [`REG_ADDR_WIDTH - 1 : 0] rs2_addr;
-  
+
   wire                           mem_read;
   wire                           mem_write;
 
@@ -82,7 +83,8 @@ module tinyrisc_ID (
       .alu_src        (alu_src_out),
       .alu_zero_preset(alu_zero_preset),
       .is_reg_write   (reg_we_out),
-      .is_mem_to_reg  (mem_to_reg_out)
+      .is_mem_to_reg  (mem_to_reg_out),
+      .mem_width      (mem_width_out)
   );
 
   assign data_we_out = mem_write;

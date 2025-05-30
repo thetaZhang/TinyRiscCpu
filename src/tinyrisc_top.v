@@ -16,11 +16,11 @@ module tinyrisc_top (
   // pc, inst
   localparam IF_ID_WIDTH = `INST_WIDTH + `ADDR_WIDTH;
 
-  // rs1, rs2, imm, alu_op, alu_zero_preset, alu_src, pc, pc_sel, data_we, data_ce, mem_to_reg, rd_addr, reg_we
-  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `ALU_OP_WIDTH + 2 + `ADDR_WIDTH + `PC_SEL_WIDTH + 3 + `REG_ADDR_WIDTH + 1;
+  // rs1, rs2, imm, alu_op, alu_zero_preset, alu_src, pc, pc_sel, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width
+  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `ALU_OP_WIDTH + 1 + `ALU_SRC_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH;
 
-  // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, pc_next, is_branch, reg_we
-  localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + `ADDR_WIDTH + 1 + 1;
+  // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, pc_next, is_branch, reg_we, mem_width
+  localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + `ADDR_WIDTH + 1 + 1 + `MEM_MODE_WIDTH;
 
 
   // ex_data_out, data_rd, mem_to_reg, rd_addr, reg_we
@@ -43,10 +43,11 @@ module tinyrisc_top (
   wire [    `DATA_WIDTH - 1 : 0] rd_data_id;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_id;
   wire [    `DATA_WIDTH - 1 : 0] imm_id;
-  wire                           alu_src_id;
+  wire [ `ALU_SRC_WIDTH - 1 : 0] alu_src_id;
   wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_id;
   wire                           data_we_id;
   wire                           data_ce_id;
+  wire [`MEM_MODE_WIDTH - 1 : 0] mem_width_id;
   wire                           mem_to_id;
   wire                           reg_we_id;
 
@@ -56,12 +57,13 @@ module tinyrisc_top (
   wire [    `DATA_WIDTH - 1 : 0] imm_ex;
   wire [  `ALU_OP_WIDTH - 1 : 0] alu_op_ex;
   wire                           alu_zero_preset_ex;
-  wire                           alu_src_ex;
+  wire [ `ALU_SRC_WIDTH - 1 : 0] alu_src_ex;
   wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_ex;
   wire [    `ADDR_WIDTH - 1 : 0] pc_ex;
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_ex;
   wire                           data_we_ex;
   wire                           data_ce_ex;
+  wire [`MEM_MODE_WIDTH - 1 : 0] mem_width_ex;
   wire                           mem_to_reg_ex;
   wire [    `DATA_WIDTH - 1 : 0] ex_data_out;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_ex;
@@ -74,6 +76,7 @@ module tinyrisc_top (
   wire [    `DATA_WIDTH - 1 : 0] rs2_data_mem;
   wire                           data_we_mem;
   wire                           data_ce_mem;
+  wire [`MEM_MODE_WIDTH - 1 : 0] mem_width_mem;
   wire                           mem_to_reg_mem;
   wire [    `DATA_WIDTH - 1 : 0] data_rd_mem;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_mem;
@@ -131,6 +134,7 @@ module tinyrisc_top (
       .alu_src_out    (alu_src_id),
       .data_we_out    (data_we_id),
       .data_ce_out    (data_ce_id),
+      .mem_width_out  (mem_width_id),
       .mem_to_reg_out (mem_to_reg_id),
       .alu_zero_preset(alu_zero_preset_id)
   );
@@ -151,7 +155,8 @@ module tinyrisc_top (
         data_ce_id,
         mem_to_reg_id,
         rd_addr_id,
-        reg_we_id
+        reg_we_id,
+        mem_width_id
       }),
       .q({
         rs1_data_ex,
@@ -166,7 +171,8 @@ module tinyrisc_top (
         data_ce_ex,
         mem_to_reg_ex,
         rd_addr_ex,
-        reg_we_ex
+        reg_we_ex,
+        mem_width_ex
       })
   );
 
@@ -199,7 +205,8 @@ module tinyrisc_top (
         rd_addr_ex,
         pc_next_ex,
         is_branch_ex,
-        reg_we_ex
+        reg_we_ex,
+        mem_width_ex
       }),
       .q({
         ex_data_out_mem,
@@ -210,7 +217,8 @@ module tinyrisc_top (
         rd_addr_mem,
         pc_next_mem,
         is_branch_mem,
-        reg_we_mem
+        reg_we_mem,
+        mem_width_mem
       })
   );
 
@@ -218,9 +226,13 @@ module tinyrisc_top (
   // MEM
   assign data_addr_out = ex_data_out_mem[`ADDR_WIDTH-1 : 0];
   assign data_write_out = rs2_data_mem;
-  assign data_rd_mem = data_read_in;
   assign data_we_out = data_we_mem;
   assign data_ce_out = data_ce_mem;
+  assign data_rd_mem = (mem_width_mem == `MEM_WORD) ? data_read_in :
+                       (mem_width_mem == `MEM_HALF) ? {{(`DATA_WORD - `DATA_HALF){data_read_in[`DATA_HALF - 1]}}, data_read_in[`DATA_HALF - 1 : 0]} :
+                       (mem_width_mem == `MEM_BYTE) ? {{(`DATA_WORD - `DATA_BYTE){data_read_in[`DATA_BYTE - 1]}}, data_read_in[`DATA_BYTE - 1 : 0]} :
+                       (mem_width_mem == `MEM_BYTE_U) ? {24'b0, data_read_in[`DATA_BYTE - 1 : 0]} :
+                       (mem_width_mem == `MEM_HALF_U) ? {16'b0, data_read_in[`DATA_HALF - 1 : 0]} : data_read_in;
 
   DffNegRst #(MEM_WB_WIDTH) mem_wb_reg_u (
       .clk  (clk),

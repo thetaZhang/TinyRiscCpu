@@ -24,6 +24,7 @@ localparam integer SLL = `ALU_SLL;
 localparam integer SRL = `ALU_SRL;
 localparam integer LT  = `ALU_LT;
 localparam integer LTU = `ALU_LTU;
+localparam integer SRA = `ALU_SRA;
 
 wire carry;
 wire overflow;
@@ -35,6 +36,7 @@ wire [DATA_WIDTH - 1 : 0] res_or;
 wire [DATA_WIDTH - 1 : 0] res_xor;
 wire [DATA_WIDTH - 1 : 0] res_sll;
 wire [DATA_WIDTH - 1 : 0] res_srl;
+wire [DATA_WIDTH - 1 : 0] res_sra;
 
 wire inv_1;
 wire inv_2;
@@ -56,6 +58,7 @@ assign res_or = in_1 | in_2;
 assign res_xor = in_1 ^ in_2;
 assign res_sll = in_1 << in_2[4:0];
 assign res_srl = in_1 >> in_2[4:0];
+assign res_sra = $signed(in_1) >>> in_2[4:0];
 
 
 assign overflow = (in_1[DATA_WIDTH - 1] == in_2[DATA_WIDTH - 1]) && (res_add_sub[DATA_WIDTH - 1] != in_1[DATA_WIDTH - 1]);
@@ -64,13 +67,15 @@ assign less_than = (data_in_2 == {1'b1,{(DATA_WIDTH - 1){1'b0}}}) ? 1'b0 :
                    (~overflow) ? res_add_sub[DATA_WIDTH - 1] : in_1[DATA_WIDTH - 1];
 assign less_than_unsigned = (|data_in_2) && (~carry);
 
-assign data_out = (op_ctrl == ADD) ? res_add_sub :
+assign data_out = (op_ctrl == NONE) ? data_in_2 :
+                  (op_ctrl == ADD) ? res_add_sub :
                   (op_ctrl == SUB) ? res_add_sub :
                   (op_ctrl == AND) ? res_and :
                   (op_ctrl == OR)  ? res_or :
                   (op_ctrl == XOR) ? res_xor :
                   (op_ctrl == SLL) ? res_sll :
                   (op_ctrl == SRL) ? res_srl :
+                  (op_ctrl == SRA) ? res_sra :
                   (op_ctrl == LT)  ? {{(DATA_WIDTH - 1){1'b0}}, (less_than)} :
                   (op_ctrl == LTU) ? {{(DATA_WIDTH - 1){1'b0}}, (less_than_unsigned)} : 0;
 

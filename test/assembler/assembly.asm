@@ -3,24 +3,10 @@ addi x0,x0,0
 addi x0,x0,0
 addi x0,x0,0
 addi x0,x0,0
-addi x1,x1,4
+sub x2,x1,x0
 addi x0,x0,0
 addi x0,x0,0
-addi x0,x0,0
-addi x0,x0,0
-addi x2,x1,4
-addi x0,x0,0
-addi x0,x0,0
-addi x0,x0,0
-addi x0,x0,0
-sw x1,0(x0)
-addi x0,x0,0
-addi x0,x0,0
-addi x0,x0,0
-addi x0,x0,0
-sw x2,4(x0)
-addi x0,x0,0
-addi x0,x0,0
+add x4,x2,x2
 addi x0,x0,0
 addi x0,x0,0
  

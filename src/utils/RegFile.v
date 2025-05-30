@@ -1,4 +1,5 @@
 // register file
+// when read and write addresses are the same, the read data is the written data
 
 module RegFile #(
   parameter integer ADDR_WIDTH = 5,
@@ -33,8 +34,8 @@ generate
   end
 endgenerate
 
-assign data_rd_1 = reg_file[addr_rd_1];
-assign data_rd_2 = reg_file[addr_rd_2];
+assign data_rd_1 = (addr_rd_1 == addr_wr) ? data_wr : reg_file[addr_rd_1];
+assign data_rd_2 = (addr_rd_2 == addr_wr) ? data_wr : reg_file[addr_rd_2];
 
 
 endmodule
