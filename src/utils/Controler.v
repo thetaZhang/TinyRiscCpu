@@ -1,5 +1,5 @@
 // main controller
-
+`include "GlobalDefine.vh"
 `define R_TYPE_INPUT ((inst_in & `R_TYPE_MASK) == `INST_ADD) || \
                      ((inst_in & `R_TYPE_MASK) == `INST_SUB) || \
                      ((inst_in & `R_TYPE_MASK) == `INST_AND) || \
@@ -74,11 +74,11 @@ module Controler #(
   assign is_mem_to_reg = (`I_TYPE_LD_INPUT) ? 1'b1 : 1'b0;
 
 
-  assign alu_src = (`R_TYPE_INPUT) ? `ALU_A_SRC_REG | `ALU_B_SRC_REG :
-                   (`I_TYPE_INPUT) ? `ALU_A_SRC_REG | `ALU_B_SRC_IMM :
-                   (`S_TYPE_INPUT) ? `ALU_A_SRC_REG | `ALU_B_SRC_IMM :
-                   (`B_TYPE_INPUT) ? `ALU_A_SRC_REG | `ALU_B_SRC_REG :
-                   (`U_TYPE_INPUT) ? `ALU_A_SRC_PC  | `ALU_B_SRC_IMM : `ALU_A_SRC_REG | `ALU_B_SRC_REG;
+  assign alu_src = (`R_TYPE_INPUT) ? {`ALU_B_SRC_REG, `ALU_A_SRC_REG } :
+                   (`I_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
+                   (`S_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
+                   (`B_TYPE_INPUT) ? {`ALU_B_SRC_REG, `ALU_A_SRC_REG } :
+                   (`U_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_PC  } : {`ALU_B_SRC_REG, `ALU_A_SRC_REG};
 
   assign is_reg_write = (`R_TYPE_INPUT) ? 1'b1 :
                       (`I_TYPE_INPUT) ? 1'b1 :

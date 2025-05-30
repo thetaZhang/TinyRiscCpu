@@ -1,5 +1,5 @@
 // instruction fetch
-
+`include "GlobalDefine.vh"
 module tinyrisc_IF (
   input clk,
   input rst_n,

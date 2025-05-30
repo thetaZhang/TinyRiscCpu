@@ -74,12 +74,12 @@
 `define ALU_SRC_WIDTH 2
 
 // ALU input A src
-`define ALU_A_SRC_PC 2'b01
-`define ALU_A_SRC_REG 2'b00
+`define ALU_A_SRC_PC 1'b1
+`define ALU_A_SRC_REG 1'b0
 
 // ALU input B src
-`define ALU_B_SRC_IMM 2'b10
-`define ALU_B_SRC_REG 2'b00
+`define ALU_B_SRC_IMM 1'b1
+`define ALU_B_SRC_REG 1'b0
 
 //ALUopcodes
 `define ALU_OP_WIDTH 4
@@ -113,6 +113,14 @@
 `define MEM_BYTE 3'b010
 `define MEM_HALF_U 3'b011
 `define MEM_BYTE_U 3'b100
+
+// Forwarding
+`define FWD_WIDTH 2
+
+// EX in forwarding
+`define FWD_NONE   2'b00
+`define EX_FWD_MEM  2'b01
+`define EX_FWD_WB   2'b10
 
 // test data path
 `ifndef TEST_DATA_PATH

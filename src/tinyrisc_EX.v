@@ -1,5 +1,5 @@
 // instruction execution
-
+`include "GlobalDefine.vh"
 module tinyrisc_EX (
     input clk,
     input rst_n,

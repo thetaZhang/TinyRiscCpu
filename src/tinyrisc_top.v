@@ -1,5 +1,5 @@
 // top of the tinyrisc CPU
-
+`include "GlobalDefine.vh"
 module tinyrisc_top (
     input                        clk,
     input                        rst_n,
@@ -16,8 +16,8 @@ module tinyrisc_top (
   // pc, inst
   localparam IF_ID_WIDTH = `INST_WIDTH + `ADDR_WIDTH;
 
-  // rs1, rs2, imm, alu_op, alu_zero_preset, alu_src, pc, pc_sel, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width
-  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `ALU_OP_WIDTH + 1 + `ALU_SRC_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH;
+  // rs1, rs2, imm, rs1_addr, rs2_addr, alu_op, alu_zero_preset, alu_src, pc, pc_sel, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width
+  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `REG_ADDR_WIDTH * 2 + `ALU_OP_WIDTH + 1 + `ALU_SRC_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH;
 
   // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, pc_next, is_branch, reg_we, mem_width
   localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + `ADDR_WIDTH + 1 + 1 + `MEM_MODE_WIDTH;
@@ -40,6 +40,8 @@ module tinyrisc_top (
   wire                           alu_zero_preset_id;
   wire [    `DATA_WIDTH - 1 : 0] rs1_data_id;
   wire [    `DATA_WIDTH - 1 : 0] rs2_data_id;
+  wire [`REG_ADDR_WIDTH - 1 : 0] rs1_addr_id;
+  wire [`REG_ADDR_WIDTH - 1 : 0] rs2_addr_id;
   wire [    `DATA_WIDTH - 1 : 0] rd_data_id;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_id;
   wire [    `DATA_WIDTH - 1 : 0] imm_id;
@@ -54,6 +56,10 @@ module tinyrisc_top (
   // EX variables
   wire [    `DATA_WIDTH - 1 : 0] rs1_data_ex;
   wire [    `DATA_WIDTH - 1 : 0] rs2_data_ex;
+  wire [    `DATA_WIDTH - 1 : 0] rs1_data_fwded_ex;
+  wire [    `DATA_WIDTH - 1 : 0] rs2_data_fwded_ex;
+  wire [`REG_ADDR_WIDTH - 1 : 0] rs1_addr_ex;
+  wire [`REG_ADDR_WIDTH - 1 : 0] rs2_addr_ex;
   wire [    `DATA_WIDTH - 1 : 0] imm_ex;
   wire [  `ALU_OP_WIDTH - 1 : 0] alu_op_ex;
   wire                           alu_zero_preset_ex;
@@ -69,6 +75,8 @@ module tinyrisc_top (
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_ex;
   wire                           is_branch_ex;
   wire                           reg_we_ex;
+  wire [`FWD_WIDTH - 1 : 0]      rs1_fwd_ex;
+  wire [`FWD_WIDTH - 1 : 0]      rs2_fwd_ex;
 
 
   // MEM variables
@@ -124,6 +132,8 @@ module tinyrisc_top (
       .imm_out        (imm_id),
       .rs1_data_out   (rs1_data_id),
       .rs2_data_out   (rs2_data_id),
+      .rs1_addr_out   (rs1_addr_id),
+      .rs2_addr_out   (rs2_addr_id),
       .rd_data_in     (rd_data_id),
       .rd_addr_out    (rd_addr_id),
       .rd_addr_in     (rd_addr_wb),
@@ -145,6 +155,8 @@ module tinyrisc_top (
       .d({
         rs1_data_id,
         rs2_data_id,
+        rs1_addr_id,
+        rs2_addr_id,
         imm_id,
         alu_op_id,
         alu_zero_preset_id,
@@ -161,6 +173,8 @@ module tinyrisc_top (
       .q({
         rs1_data_ex,
         rs2_data_ex,
+        rs1_addr_ex,
+        rs2_addr_ex,
         imm_ex,
         alu_op_ex,
         alu_zero_preset_ex,
@@ -177,11 +191,30 @@ module tinyrisc_top (
   );
 
   // EX
+
+  tinyrisc_Forwarding Forwarding_u (
+      .ex_mem_rd_in   (rd_addr_mem),
+      .mem_wb_rd_in   (rd_addr_wb),
+      .id_ex_rs1_addr_in(rs1_addr_ex),
+      .id_ex_rs2_addr_in(rs2_addr_ex),
+      .ex_mem_reg_we_in(reg_we_mem),
+      .mem_wb_reg_we_in(reg_we_wb),
+
+      .ex_rs1_fwd_out(rs1_fwd_ex),
+      .ex_rs2_fwd_out(rs2_fwd_ex)
+  );
+
+  assign rs1_data_fwded_ex = (rs1_fwd_ex == `EX_FWD_MEM) ? ex_data_out_mem :
+                             (rs1_fwd_ex == `EX_FWD_WB) ? rd_data_id : rs1_data_ex;
+
+  assign rs2_data_fwded_ex = (rs2_fwd_ex == `EX_FWD_MEM) ? ex_data_out_mem :
+                             (rs2_fwd_ex == `EX_FWD_WB) ? rd_data_id : rs2_data_ex;
+
   tinyrisc_EX EX_u (
       .clk            (clk),
       .rst_n          (rst_n),
-      .rs1_data_in    (rs1_data_ex),
-      .rs2_data_in    (rs2_data_ex),
+      .rs1_data_in    (rs1_data_fwded_ex),
+      .rs2_data_in    (rs2_data_fwded_ex),
       .imm_in         (imm_ex),
       .alu_op_in      (alu_op_ex),
       .alu_src_in     (alu_src_ex),

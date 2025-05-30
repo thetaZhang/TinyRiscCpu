@@ -1,5 +1,5 @@
 // instruction decode
-
+`include "GlobalDefine.vh"
 module tinyrisc_ID (
     input clk,
     input rst_n,
@@ -9,6 +9,8 @@ module tinyrisc_ID (
     output [    `DATA_WIDTH - 1 : 0] imm_out,
     output [    `DATA_WIDTH - 1 : 0] rs1_data_out,
     output [    `DATA_WIDTH - 1 : 0] rs2_data_out,
+    output [`REG_ADDR_WIDTH - 1 : 0] rs1_addr_out,
+    output [`REG_ADDR_WIDTH - 1 : 0] rs2_addr_out,
     input  [    `DATA_WIDTH - 1 : 0] rd_data_in,
     input  [`REG_ADDR_WIDTH - 1 : 0] rd_addr_in,
     input                            reg_we_in,
@@ -31,6 +33,9 @@ module tinyrisc_ID (
 
   wire                           mem_read;
   wire                           mem_write;
+  
+  assign rs1_addr_out = rs1_addr;
+  assign rs2_addr_out = rs2_addr;
 
   ImmGen #(
       .INST_WIDTH(`INST_WIDTH),

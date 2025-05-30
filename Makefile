@@ -3,6 +3,7 @@ SIMULATOR ?= iverilog
 
 VERILOG_SRC += $(wildcard $(PWD)/src/*.v)
 VERILOG_SRC += $(wildcard $(PWD)/src/*/*.v)
+INC_DIR += $(wildcard $(PWD)/src/inc)
 TEST_SRC += $(wildcard $(PWD)/test/riscv_soc_tb.v)
 TOP = riscv_soc_tb
 
@@ -10,12 +11,12 @@ TOP = riscv_soc_tb
 ifeq ($(SIMULATOR), iverilog)
     SIM_CMD = iverilog
     SIM_RUN = vvp
-    COMPILE_ARGS = -o $(BIN) -s $(TOP) -D TEST_DATA_PATH=\"$(DATA_PATH)\" -D TEST_INST_PATH=\"$(INST_PATH)\"
+    COMPILE_ARGS = -o $(BIN) -s $(TOP) -D TEST_DATA_PATH=\"$(DATA_PATH)\" -D TEST_INST_PATH=\"$(INST_PATH)\" -I $(INC_DIR)
     SIM_ARGS = 
 else ifeq ($(SIMULATOR), questa) 
     SIM_CMD = vlog
     SIM_RUN = vsim
-    COMPILE_ARGS = -work $(QS_LIB_DIR) +define+TEST_DATA_PATH=\"$(DATA_PATH)\" +define+TEST_INST_PATH=\"$(INST_PATH)\"
+    COMPILE_ARGS = -work $(QS_LIB_DIR) +define+TEST_DATA_PATH=\"$(DATA_PATH)\" +define+TEST_INST_PATH=\"$(INST_PATH)\" +incdir+$(INC_DIR)
     SIM_ARGS = -c -voptargs=+acc -l $(BUILD_DIR)/transcript -do "run -all;" $(TOP)
 		SIM_WAVE_ARGS = -voptargs=+acc -l $(BUILD_DIR)/transcript -wlf $(BUILD_DIR)/$(TOP).wlf -do "log -r /*;run -all;" $(TOP)
 else
@@ -38,7 +39,7 @@ BIN = $(BUILD_DIR)/$(TOP).vvp
 
 ifeq ($(SIMULATOR), iverilog)
 $(BIN): $(VERILOG_SRC) $(TEST_SRC) | $(BUILD_DIR)
-	$(SIM_CMD) $(COMPILE_ARGS) $(VERILOG_SRC) $(TEST_SRC)
+	$(SIM_CMD) $(COMPILE_ARGS) $(VERILOG_SRC) $(TEST_SRC) 
 else ifeq ($(SIMULATOR), questa)
 $(BIN): $(VERILOG_SRC) $(TEST_SRC) | $(QS_LIB_DIR)
 	$(SIM_CMD) $(COMPILE_ARGS) $(VERILOG_SRC) $(TEST_SRC)
