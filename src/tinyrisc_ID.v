@@ -19,8 +19,13 @@ module tinyrisc_ID (
     input                            reg_we_in,
     output                           reg_we_out,
 
+    input  [    `DATA_WIDTH - 1 : 0] rs1_data_fwded_in,
+    input  [    `DATA_WIDTH - 1 : 0] rs2_data_fwded_in,
+    input  [`FWD_WIDTH - 1 : 0]      rs1_fwd,
+    input  [`FWD_WIDTH - 1 : 0]      rs2_fwd,
+
     output [  `ALU_OP_WIDTH - 1 : 0] alu_op_out,
-    //output [  `PC_SEL_WIDTH - 1 : 0] pc_sel_out,
+    output [  `PC_SEL_WIDTH - 1 : 0] pc_sel_out,
     output [ `ALU_SRC_WIDTH - 1 : 0] alu_src_out,
     output                           data_we_out,
     output                           data_ce_out,
@@ -43,9 +48,14 @@ module tinyrisc_ID (
 
   wire                           mem_read;
   wire                           mem_write;
+
+  wire [`DATA_WIDTH - 1 : 0] rs1_data_fwded;
+  wire [`DATA_WIDTH - 1 : 0] rs2_data_fwded;
   
   assign rs1_addr_out = rs1_addr;
   assign rs2_addr_out = rs2_addr;
+
+  assign pc_sel_out = pc_sel;
 
   ImmGen #(
       .INST_WIDTH(`INST_WIDTH),
@@ -106,10 +116,15 @@ module tinyrisc_ID (
   assign data_ce_out = mem_read | mem_write;
 
 
+
+  assign rs1_data_fwded = (rs1_fwd == `ID_FWD_MEM) ? rs1_data_fwded_in : rs1_data;
+
+  assign rs2_data_fwded = (rs2_fwd == `ID_FWD_MEM) ? rs2_data_fwded_in : rs2_data;
+
   BranchGen branch_gen_u (
       .pc_in          (pc_in),
-      .rs1_data_in    (rs1_data),
-      .rs2_data_in    (rs2_data),
+      .rs1_data_in    (rs1_data_fwded),
+      .rs2_data_in    (rs2_data_fwded),
       .imm_in         (imm),
       .pc_sel_in      (pc_sel),
       .pc_alu_op_in   (alu_op),
