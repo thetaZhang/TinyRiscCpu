@@ -16,11 +16,11 @@ module tinyrisc_top (
   // pc, inst
   localparam IF_ID_WIDTH = `INST_WIDTH + `ADDR_WIDTH;
 
-  // rs1, rs2, imm, rs1_addr, rs2_addr, alu_op, alu_zero_preset, alu_src, pc, pc_sel, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width
-  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `REG_ADDR_WIDTH * 2 + `ALU_OP_WIDTH + 1 + `ALU_SRC_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH;
+  // rs1, rs2, imm, rs1_addr, rs2_addr, alu_op,  alu_src, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width
+  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `REG_ADDR_WIDTH * 2 + `ALU_OP_WIDTH  + `ALU_SRC_WIDTH  + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH;
 
-  // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, pc_next, is_branch, reg_we, mem_width, rs2_addr
-  localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + `ADDR_WIDTH + 1 + 1 + `MEM_MODE_WIDTH + `REG_ADDR_WIDTH;
+  // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width, rs2_addr
+  localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH + `REG_ADDR_WIDTH;
 
 
   // ex_data_out, data_rd, mem_to_reg, rd_addr, reg_we
@@ -55,6 +55,8 @@ module tinyrisc_top (
   wire                           reg_we_id;
   wire                           reg_we_stalled_id;
   wire                           data_ce_stalled_id;
+  wire [    `ADDR_WIDTH - 1 : 0] pc_next_id;
+  wire                           is_branch_id;
 
   // EX variables
   wire [    `DATA_WIDTH - 1 : 0] rs1_data_ex;
@@ -65,18 +67,13 @@ module tinyrisc_top (
   wire [`REG_ADDR_WIDTH - 1 : 0] rs2_addr_ex;
   wire [    `DATA_WIDTH - 1 : 0] imm_ex;
   wire [  `ALU_OP_WIDTH - 1 : 0] alu_op_ex;
-  wire                           alu_zero_preset_ex;
   wire [ `ALU_SRC_WIDTH - 1 : 0] alu_src_ex;
-  wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_ex;
-  wire [    `ADDR_WIDTH - 1 : 0] pc_ex;
-  wire [    `ADDR_WIDTH - 1 : 0] pc_next_ex;
   wire                           data_we_ex;
   wire                           data_ce_ex;
   wire [`MEM_MODE_WIDTH - 1 : 0] mem_width_ex;
   wire                           mem_to_reg_ex;
   wire [    `DATA_WIDTH - 1 : 0] ex_data_out;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_ex;
-  wire                           is_branch_ex;
   wire                           reg_we_ex;
   wire [`FWD_WIDTH - 1 : 0]      rs1_fwd_ex;
   wire [`FWD_WIDTH - 1 : 0]      rs2_fwd_ex;
@@ -92,8 +89,6 @@ module tinyrisc_top (
   wire                           mem_to_reg_mem;
   wire [    `DATA_WIDTH - 1 : 0] data_rd_mem;
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_mem;
-  wire [    `ADDR_WIDTH - 1 : 0] pc_next_mem;
-  wire                           is_branch_mem;
   wire                           reg_we_mem;
   wire [`FWD_WIDTH - 1 : 0]      rs2_fwd_mem;
 
@@ -110,8 +105,8 @@ module tinyrisc_top (
   // IF
 
   assign inst_addr_out = pc_if;
-  assign is_branch_if = is_branch_mem;
-  assign pc_next_if = pc_next_mem;
+  assign is_branch_if = is_branch_id;
+  assign pc_next_if = pc_next_id;
   assign pc_en_if = ~stall_if;
 
   tinyrisc_IF IF_u (
@@ -137,6 +132,9 @@ module tinyrisc_top (
       .clk            (clk),
       .rst_n          (rst_n),
       .inst_in        (inst_id),
+      .pc_in          (pc_id),
+      .pc_next_out    (pc_next_id),
+      .is_branch_out  (is_branch_id),
       .imm_out        (imm_id),
       .rs1_data_out   (rs1_data_id),
       .rs2_data_out   (rs2_data_id),
@@ -148,13 +146,11 @@ module tinyrisc_top (
       .reg_we_in      (reg_we_wb),
       .reg_we_out     (reg_we_id),
       .alu_op_out     (alu_op_id),
-      .pc_sel_out     (pc_sel_id),
       .alu_src_out    (alu_src_id),
       .data_we_out    (data_we_id),
       .data_ce_out    (data_ce_id),
       .mem_width_out  (mem_width_id),
-      .mem_to_reg_out (mem_to_reg_id),
-      .alu_zero_preset(alu_zero_preset_id)
+      .mem_to_reg_out (mem_to_reg_id)
   );
 
   assign reg_we_stalled_id = stall_if ? 1'b0 : reg_we_id;
@@ -170,10 +166,7 @@ module tinyrisc_top (
         rs2_addr_id,
         imm_id,
         alu_op_id,
-        alu_zero_preset_id,
         alu_src_id,
-        pc_id,
-        pc_sel_id,
         data_we_id,
         data_ce_stalled_id,
         mem_to_reg_id,
@@ -188,10 +181,7 @@ module tinyrisc_top (
         rs2_addr_ex,
         imm_ex,
         alu_op_ex,
-        alu_zero_preset_ex,
         alu_src_ex,
-        pc_ex,
-        pc_sel_ex,
         data_we_ex,
         data_ce_ex,
         mem_to_reg_ex,
@@ -217,12 +207,7 @@ module tinyrisc_top (
       .imm_in         (imm_ex),
       .alu_op_in      (alu_op_ex),
       .alu_src_in     (alu_src_ex),
-      .alu_zero_preset(alu_zero_preset_ex),
-      .ex_data_out    (ex_data_out),
-      .pc_sel_in      (pc_sel_ex),
-      .pc_in          (pc_ex),
-      .pc_out         (pc_next_ex),
-      .is_branch      (is_branch_ex)
+      .ex_data_out    (ex_data_out)
   );
 
   DffNegRst #(EX_MEM_WIDTH) ex_mem_reg_u (
@@ -236,8 +221,6 @@ module tinyrisc_top (
         data_ce_ex,
         mem_to_reg_ex,
         rd_addr_ex,
-        pc_next_ex,
-        is_branch_ex,
         reg_we_ex,
         mem_width_ex
       }),
@@ -249,8 +232,6 @@ module tinyrisc_top (
         data_ce_mem,
         mem_to_reg_mem,
         rd_addr_mem,
-        pc_next_mem,
-        is_branch_mem,
         reg_we_mem,
         mem_width_mem
       })

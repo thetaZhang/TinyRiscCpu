@@ -78,7 +78,7 @@ module Controler #(
                    (`I_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
                    (`S_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
                    (`B_TYPE_INPUT) ? {`ALU_B_SRC_REG, `ALU_A_SRC_REG } :
-                   (`U_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_PC  } : {`ALU_B_SRC_REG, `ALU_A_SRC_REG};
+                   (`U_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG  } : {`ALU_B_SRC_REG, `ALU_A_SRC_REG};
 
   assign is_reg_write = (`R_TYPE_INPUT) ? 1'b1 :
                       (`I_TYPE_INPUT) ? 1'b1 :
