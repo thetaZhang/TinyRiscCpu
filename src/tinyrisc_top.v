@@ -308,7 +308,7 @@ module tinyrisc_top (
 
 
   // pipeline flush
-  assign flush_id   = (pc_sel_ex != `PC_PLUS4) && ((is_branch_ex != is_branch_bp_ex) || ((is_branch_ex == is_branch_bp_ex) && (pc_next_ex != pc_next_bp_ex)));
+  assign flush_id   = (pc_sel_ex != `PC_PLUS4) && ((is_branch_ex != is_branch_bp_ex) || ((is_branch_ex == is_branch_bp_ex) && (is_branch_ex) && (pc_next_ex != pc_next_bp_ex)));
 
 
   // EX and MEM forwarding & ID branch forwarding
