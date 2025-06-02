@@ -49,7 +49,7 @@ assign is_branch_out = (pc_sel_in == `PC_JUMP) ||
                       (pc_sel_in == `PC_JUMP_R) ||
                       ((pc_sel_in == `PC_BRANCH) && (zero == pc_alu_zero_preset_in));
 
-assign branch_target_out = (pc_sel_in == `PC_JUMP_R) ? data_out : imm_in + pc_in;
+assign branch_target_out = (pc_sel_in == `PC_JUMP_R) ? data_out : $signed(imm_in) + pc_in;
 
 assign pc_alu_op_out = (pc_sel_in == `PC_BRANCH) ? `ALU_NONE :
                        (pc_sel_in == `PC_JUMP) ? `ALU_ADD :

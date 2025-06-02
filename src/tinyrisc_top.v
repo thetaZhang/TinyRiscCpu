@@ -49,7 +49,6 @@ module tinyrisc_top (
   wire [`REG_ADDR_WIDTH - 1 : 0] rd_addr_id;
   wire [    `DATA_WIDTH - 1 : 0] imm_id;
   wire [ `ALU_SRC_WIDTH - 1 : 0] alu_src_id;
-  wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_id;
   wire                           data_we_id;
   wire                           data_ce_id;
   wire [`MEM_MODE_WIDTH - 1 : 0] mem_width_id;
@@ -60,7 +59,8 @@ module tinyrisc_top (
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_id;
   wire                           is_branch_id;
   wire                           is_branch_stalled_id;
-  wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel__id;
+  wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_id;
+  wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_stalled_id;
   wire [     `FWD_WIDTH - 1 : 0] rs1_fwd_id;
   wire [     `FWD_WIDTH - 1 : 0] rs2_fwd_id;
   wire [    `DATA_WIDTH - 1 : 0] rs1_data_fwded_id;
@@ -189,6 +189,7 @@ module tinyrisc_top (
   assign reg_we_stalled_id = (stall_if | flush_id | is_nop_id) ? 1'b0 : reg_we_id;
   assign data_ce_stalled_id = (stall_if | flush_id | is_nop_id) ? 1'b0 : data_ce_id;
   assign is_branch_stalled_id = (stall_if | flush_id | is_nop_id) ? 1'b0 : is_branch_id;
+  assign pc_sel_stalled_id = (stall_if | flush_id | is_nop_id) ? `PC_PLUS4 : pc_sel_id;
 
   DffNegRst #(ID_EX_WIDTH) id_ex_reg_u (
       .clk(clk),
@@ -208,7 +209,7 @@ module tinyrisc_top (
         reg_we_stalled_id,
         mem_width_id,
         pc_id,
-        pc_sel_id,
+        pc_sel_stalled_id,
         is_branch_stalled_id,
         pc_next_id,
         pc_next_bp_id,
@@ -307,7 +308,7 @@ module tinyrisc_top (
 
 
   // pipeline flush
-  assign flush_id   = (pc_sel_ex != `PC_PLUS4) && ((is_branch_ex != is_branch_bp_ex) || (pc_next_ex != pc_next_bp_ex));
+  assign flush_id   = (pc_sel_ex != `PC_PLUS4) && ((is_branch_ex != is_branch_bp_ex) || ((is_branch_ex == is_branch_bp_ex) && (pc_next_ex != pc_next_bp_ex)));
 
 
   // EX and MEM forwarding & ID branch forwarding

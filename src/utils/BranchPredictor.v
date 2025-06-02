@@ -79,7 +79,7 @@ generate
   end
 endgenerate
 
-assign btb_hit = btb_valid [btb_query_entry];
+assign btb_hit = btb_valid[btb_query_entry];
 
 assign pc_next_out = btb_target[btb_query_entry];
 
