@@ -30,7 +30,7 @@ module tinyrisc_IF (
   assign pc_next_predicted_out = pc_next_predicted;
   assign is_branch_predicted_out = is_branch_predicted;
 
-  assign pc_next = (flush_in) ? target_update_in :
+  assign pc_next = (flush_in) ? ((is_taken_update_in) ? target_update_in : pc_update_in + 4) :
                    (pc_sel == `PC_PLUS4) ? pc_out + 4 :
                    (is_branch_predicted) ? pc_next_predicted : pc_out + 4;
 
