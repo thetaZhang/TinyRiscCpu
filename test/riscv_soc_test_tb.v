@@ -1,0 +1,178 @@
+`timescale 1ps / 1ps
+
+module riscv_soc_tb ();
+
+  integer numcycles;
+
+  reg           clk;
+  reg           rst;
+
+  wire [31 : 0] reg_file_probe[0 : 31];
+
+  //useful tasks
+task step;  //step for one cycle ends 1ns AFTER the posedge of the next cycle
+  begin
+    #9  clk=1'b0;
+    #10 clk=1'b1;
+    numcycles = numcycles + 1;
+    #1 ;
+  end
+endtask
+
+task step_n; //step n cycles
+  input integer n;
+  integer i;
+  begin
+    for (i =0; i<n ; i=i+1)
+      step();
+  end
+endtask
+
+task reset_cpu;  //reset the CPU and the test
+  begin
+    rst = 1'b1;
+    step();
+    #5 rst = 1'b0;
+    numcycles = 0;
+  end
+endtask
+
+  task check_reg;//check registers
+  input [4:0] reg_id;
+  input [31:0] results;
+  reg [31:0] debug_data;
+  begin
+    debug_data=reg_file_probe[reg_id]; //get register content
+    if(debug_data==results)
+    begin
+        $display("OK: end of cycle %d reg %h need to be %h, get %h",
+                  numcycles-1, reg_id, results, debug_data);
+    end
+  else
+  begin
+    $display("!!!Error: end of cycle %d reg %h need to be %h, get %h",
+              numcycles-1, reg_id, results, debug_data);
+    end
+  end
+endtask
+
+  task print_registers;
+    integer i;
+    begin
+      $display("============ REGISTER FILE CONTENTS ============");
+      for (i = 0; i < 32; i = i + 1) begin
+        $display("x%0d 0x%08h", i, reg_file_probe[i]);
+      end
+      $display("===============================================");
+    end
+  endtask
+
+  task print_memory;
+    input [31:0] start_addr;
+    input [31:0] end_addr;
+    integer i;
+    begin
+      $display("============ MEMORY CONTENTS ============");
+      $display("Address  | Value");
+      $display("---------------------");
+      for (i = start_addr; i <= end_addr; i = i + 1) begin
+        $display("%4h     | %02h", i, data_mem0.data[i]);
+      end
+      $display("=========================================");
+    end
+  endtask
+
+  task dump_memory_to_file;
+    input [31:0] start_addr;
+    input [31:0] end_addr;
+    integer file_handle;
+    integer i;
+    begin
+      file_handle = $fopen("./build/data_mem_image.txt", "w");
+      if (file_handle == 0) begin
+        $display("Error: Could not open file for writing");
+        $finish;
+      end
+
+      $display("Dumping memory from address 0x%h to 0x%h", start_addr, end_addr);
+
+      for (i = start_addr; i <= end_addr; i = i + 1) begin
+        $fdisplay(file_handle, "%4h: %02h", i, data_mem0.data[i]);
+      end
+
+      $fclose(file_handle);
+      $display("Memory dump complete");
+    end
+  endtask
+
+  initial begin
+    clk = 1'b0;
+    forever #50 clk = ~clk;
+  end
+
+  initial begin
+    rst = 1'b1;
+    #300 rst = 1'b0;
+    #100000 $display("---     result is %d         ---\n", verify);
+    print_registers();
+    print_memory(0, 32);
+    dump_memory_to_file(0, 1024);
+    #1000 $finish;
+  end
+
+  wire [31:0] inst_addr;
+  wire [31:0] inst;
+  wire        inst_ce;
+
+  wire        data_ce;
+  wire        data_we;
+  wire [31:0] data_addr;
+  wire [31:0] wdata;
+  wire [31:0] rdata;
+  wire [31:0] verify;
+
+
+  riscv riscv0 (
+      .clk(clk),
+      .rst(rst),
+
+      .inst_addr_o(inst_addr),
+      .inst_i     (inst),
+      .inst_ce_o  (inst_ce),
+
+      .data_ce_o  (data_ce),
+      .data_we_o  (data_we),
+      .data_addr_o(data_addr),
+      .data_i     (rdata),
+      .data_o     (wdata)
+  );
+
+  inst_mem inst_mem0 (
+      .ce  (inst_ce),
+      .addr(inst_addr),
+      .inst(inst)
+  );
+
+  data_mem data_mem0 (
+      .clk   (clk),
+      .ce    (data_ce),
+      .we    (data_we),
+      .addr  (data_addr),
+      .data_i(wdata),
+      .data_o(rdata),
+      .verify(verify)
+  );
+
+  genvar i;
+  generate
+    for (i = 0; i < 32; i = i + 1) begin : gen_reg_file_probe
+      assign reg_file_probe[i] = riscv0.tinyrisc_top_inst.ID_u.regfile_u.reg_file[i];
+    end
+  endgenerate
+
+  initial begin
+    $dumpfile("./build/riscv_soc_tb.vcd");
+    $dumpvars(0, riscv_soc_tb);
+  end
+
+endmodule

@@ -16,8 +16,8 @@ module tinyrisc_top (
   // pc, inst, is_nop, pc_next_bp, is_branch_bp
   localparam IF_ID_WIDTH = `INST_WIDTH + `ADDR_WIDTH + 1 + `ADDR_WIDTH + 1;
 
-  // rs1, rs2, imm, rs1_addr, rs2_addr, alu_op,  alu_src, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width, pc, pc_sel, is_branch, pc_next, pc_next_bp, is_branch_bp
-  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `REG_ADDR_WIDTH * 2 + `ALU_OP_WIDTH  + `ALU_SRC_WIDTH  + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 1 + `ADDR_WIDTH + `ADDR_WIDTH + 1;
+  // rs1, rs2, imm, rs1_addr, rs2_addr, alu_op,  alu_src, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width, pc, pc_sel, is_branch, pc_next, pc_next_bp, is_branch_bp， reg_use
+  localparam ID_EX_WIDTH = `DATA_WIDTH * 3 + `REG_ADDR_WIDTH * 2 + `ALU_OP_WIDTH  + `ALU_SRC_WIDTH  + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH + `ADDR_WIDTH + `PC_SEL_WIDTH + 1 + `ADDR_WIDTH + `ADDR_WIDTH + 1 + 1;
 
   // ex_data_out, rs2_data, data_we, data_ce, mem_to_reg, rd_addr, reg_we, mem_width, rs2_addr
   localparam EX_MEM_WIDTH = `DATA_WIDTH * 2 + 3 + `REG_ADDR_WIDTH + 1 + `MEM_MODE_WIDTH + `REG_ADDR_WIDTH;
@@ -69,6 +69,7 @@ module tinyrisc_top (
   wire                           is_nop_id;
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_bp_id;
   wire                           is_branch_bp_id;
+  wire                           reg_use_id;
 
   // EX variables
   wire [    `DATA_WIDTH - 1 : 0] rs1_data_ex;
@@ -89,12 +90,13 @@ module tinyrisc_top (
   wire                           reg_we_ex;
   wire [     `FWD_WIDTH - 1 : 0] rs1_fwd_ex;
   wire [     `FWD_WIDTH - 1 : 0] rs2_fwd_ex;
-  wire [     `ADDR_WIDTH - 1 : 0] pc_ex;
+  wire [    `ADDR_WIDTH - 1 : 0] pc_ex;
   wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_ex;
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_ex;
   wire                           is_branch_ex;
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_bp_ex;
   wire                           is_branch_bp_ex;
+  wire                           reg_use_ex;
 
   // MEM variables
   wire [    `DATA_WIDTH - 1 : 0] ex_data_out_mem;
@@ -183,7 +185,8 @@ module tinyrisc_top (
       .data_we_out      (data_we_id),
       .data_ce_out      (data_ce_id),
       .mem_width_out    (mem_width_id),
-      .mem_to_reg_out   (mem_to_reg_id)
+      .mem_to_reg_out   (mem_to_reg_id),
+      .reg_use_out      (reg_use_id)
   );
 
   assign reg_we_stalled_id = (stall_if | flush_id | is_nop_id) ? 1'b0 : reg_we_id;
@@ -213,7 +216,8 @@ module tinyrisc_top (
         is_branch_stalled_id,
         pc_next_id,
         pc_next_bp_id,
-        is_branch_bp_id
+        is_branch_bp_id,
+        reg_use_id
       }),
       .q({
         rs1_data_ex,
@@ -234,7 +238,8 @@ module tinyrisc_top (
         is_branch_ex,
         pc_next_ex,
         pc_next_bp_ex,
-        is_branch_bp_ex
+        is_branch_bp_ex,
+        reg_use_ex
       })
   );
 
@@ -252,6 +257,7 @@ module tinyrisc_top (
       .rs1_data_in(rs1_data_fwded_ex),
       .rs2_data_in(rs2_data_fwded_ex),
       .imm_in     (imm_ex),
+      .pc_in      (pc_ex),
       .alu_op_in  (alu_op_ex),
       .alu_src_in (alu_src_ex),
       .ex_data_out(ex_data_out)
@@ -317,6 +323,8 @@ module tinyrisc_top (
       .if_id_pc_sel_in     (pc_sel_id),
       .ex_mem_rd_in        (rd_addr_mem),
       .mem_wb_rd_in        (rd_addr_wb),
+      .if_id_reg_use_in    (reg_use_id),
+      .id_ex_reg_use_in    (reg_use_ex),
       .if_id_rs1_addr_in   (rs1_addr_id),
       .if_id_rs2_addr_in   (rs2_addr_id),
       .id_ex_rs1_addr_in   (rs1_addr_ex),
@@ -342,6 +350,7 @@ module tinyrisc_top (
       .if_id_rs2_addr_in(rs2_addr_id),
       .id_ex_data_we_in (data_we_ex),
       .id_ex_data_ce_in (data_ce_ex),
+      .if_id_reg_use_in (reg_use_id),
       .id_ex_reg_we_in  (reg_we_ex),
       .if_id_pc_sel_in  (pc_sel_id),
       .ex_mem_data_we_in(data_we_mem),

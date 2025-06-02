@@ -17,9 +17,9 @@
                      ((inst_in & `I_TYPE_MASK) == `INST_XORI) || \
                      ((inst_in & `I_TYPE_MASK) == `INST_ORI ) || \
                      ((inst_in & `I_TYPE_MASK) == `INST_ANDI) || \
-                     ((inst_in & `I_TYPE_MASK) == `INST_SLLI) || \
-                     ((inst_in & `I_TYPE_MASK) == `INST_SRLI) || \
-                     ((inst_in & `I_TYPE_MASK) == `INST_SRAI) || \
+                     ((inst_in & `I_TYPE_SHF_MASK) == `INST_SLLI) || \
+                     ((inst_in & `I_TYPE_SHF_MASK) == `INST_SRLI) || \
+                     ((inst_in & `I_TYPE_SHF_MASK) == `INST_SRAI) || \
                      ((inst_in & `I_TYPE_MASK) == `INST_LW  ) || \
                      ((inst_in & `I_TYPE_MASK) == `INST_LH  ) || \
                      ((inst_in & `I_TYPE_MASK) == `INST_LB  ) || \
@@ -64,7 +64,8 @@ module Controler #(
     output                           alu_zero_preset,
     output                           is_reg_write,
     output                           is_mem_to_reg,
-    output [`MEM_MODE_WIDTH - 1 : 0] mem_width
+    output [`MEM_MODE_WIDTH - 1 : 0] mem_width,
+    output                           reg_use_out
 );
 
 
@@ -78,7 +79,9 @@ module Controler #(
                    (`I_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
                    (`S_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
                    (`B_TYPE_INPUT) ? {`ALU_B_SRC_REG, `ALU_A_SRC_REG } :
-                   (`U_TYPE_INPUT) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG  } : {`ALU_B_SRC_REG, `ALU_A_SRC_REG};
+                   ((inst_in & `U_TYPE_MASK) == `INST_LUI) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } :
+                   ((inst_in & `U_TYPE_MASK) == `INST_AUIPC) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_PC } :
+                   ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? {`ALU_B_SRC_IMM, `ALU_A_SRC_REG } : {`ALU_B_SRC_REG, `ALU_A_SRC_REG};
 
   assign is_reg_write = (`R_TYPE_INPUT) ? 1'b1 :
                       (`I_TYPE_INPUT) ? 1'b1 :
@@ -106,9 +109,9 @@ module Controler #(
                   ((inst_in & `I_TYPE_MASK) == `INST_XORI) ? `ALU_XOR :
                   ((inst_in & `I_TYPE_MASK) == `INST_ORI ) ? `ALU_OR  :
                   ((inst_in & `I_TYPE_MASK) == `INST_ANDI) ? `ALU_AND :
-                  ((inst_in & `I_TYPE_MASK) == `INST_SLLI) ? `ALU_SLL :
-                  ((inst_in & `I_TYPE_MASK) == `INST_SRLI) ? `ALU_SRL :
-                  ((inst_in & `I_TYPE_MASK) == `INST_SRAI) ? `ALU_SRA :
+                  ((inst_in & `I_TYPE_SHF_MASK) == `INST_SLLI) ? `ALU_SLL :
+                  ((inst_in & `I_TYPE_SHF_MASK) == `INST_SRLI) ? `ALU_SRL :
+                  ((inst_in & `I_TYPE_SHF_MASK) == `INST_SRAI) ? `ALU_SRA :
                   ((inst_in & `I_TYPE_MASK) == `INST_LW) ? `ALU_ADD :
                   ((inst_in & `I_TYPE_MASK) == `INST_LH) ? `ALU_ADD :
                   ((inst_in & `I_TYPE_MASK) == `INST_LB) ? `ALU_ADD :
@@ -143,5 +146,7 @@ module Controler #(
                    ((inst_in & `S_TYPE_MASK) == `INST_SW) ? `MEM_WORD :
                    ((inst_in & `S_TYPE_MASK) == `INST_SH) ? `MEM_HALF :
                    ((inst_in & `S_TYPE_MASK) == `INST_SB) ? `MEM_BYTE : `MEM_WORD;
+  
+  assign reg_use_out = !(`U_TYPE_INPUT);
 
 endmodule

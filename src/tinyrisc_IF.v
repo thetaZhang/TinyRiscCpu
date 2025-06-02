@@ -27,12 +27,14 @@ module tinyrisc_IF (
   wire [`PC_SEL_WIDTH - 1 : 0] pc_sel;
   wire                         is_branch_predicted;
 
-  assign pc_next_predicted_out = pc_next_predicted;
+  wire                         btb_hit;
+
+  assign pc_next_predicted_out = (btb_hit) ? pc_next_predicted : pc_out + 4;
   assign is_branch_predicted_out = is_branch_predicted;
 
   assign pc_next = (flush_in) ? ((is_taken_update_in) ? target_update_in : pc_update_in + 4) :
                    (pc_sel == `PC_PLUS4) ? pc_out + 4 :
-                   (is_branch_predicted) ? pc_next_predicted : pc_out + 4;
+                   (is_branch_predicted && btb_hit) ? pc_next_predicted : pc_out + 4;
 
   // pre-decode
   assign pc_sel = (inst_in[6 : 0] == 7'b1100011) ? `PC_BRANCH :
@@ -54,7 +56,8 @@ module tinyrisc_IF (
       .is_taken_update_in(is_taken_update_in),
       .target_update_in  (target_update_in  ),
       .pc_next_out       (pc_next_predicted),
-      .is_taken_next_out (is_branch_predicted)
+      .is_taken_next_out (is_branch_predicted),
+      .btb_hit_out       (btb_hit)
   );
 
 

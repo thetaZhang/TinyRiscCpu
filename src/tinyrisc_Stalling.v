@@ -8,6 +8,7 @@ module tinyrisc_Stalling(
     input [`REG_ADDR_WIDTH - 1 : 0] if_id_rs2_addr_in,
     input                           id_ex_data_we_in,
     input                           id_ex_data_ce_in,
+    input                           if_id_reg_use_in,
     input                           id_ex_reg_we_in,
     input                           ex_mem_data_we_in,
     input                           ex_mem_data_ce_in,
@@ -31,10 +32,12 @@ assign ex_mem_mem_read = (~ex_mem_data_we_in && ex_mem_data_ce_in);
 
 assign stall_out = ((id_ex_reg_we_in) &&
                    (id_ex_mem_read || is_branch) &&
+                   (if_id_reg_use_in) &&
                    ((id_ex_rd_addr_in == if_id_rs1_addr_in) ||
                     (id_ex_rd_addr_in == if_id_rs2_addr_in))) ||
                    ((ex_mem_reg_we_in) &&
                    (ex_mem_mem_read && is_branch) &&
+                   (if_id_reg_use_in) &&
                    ((ex_mem_rd_addr_in == if_id_rs1_addr_in) ||
                     (ex_mem_rd_addr_in == if_id_rs2_addr_in)));
 

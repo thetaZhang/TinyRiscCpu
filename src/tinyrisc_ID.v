@@ -32,7 +32,8 @@ module tinyrisc_ID (
     output [`MEM_MODE_WIDTH - 1 : 0] mem_width_out,
     output                           mem_to_reg_out,
     //output                           alu_zero_preset_out,
-    output [`REG_ADDR_WIDTH - 1 : 0] rd_addr_out
+    output [`REG_ADDR_WIDTH - 1 : 0] rd_addr_out,
+    output                           reg_use_out
 
 );
 
@@ -109,7 +110,8 @@ module tinyrisc_ID (
       .alu_zero_preset(alu_zero_preset),
       .is_reg_write   (reg_we_out),
       .is_mem_to_reg  (mem_to_reg_out),
-      .mem_width      (mem_width_out)
+      .mem_width      (mem_width_out),
+      .reg_use_out    (reg_use_out)
   );
 
   assign data_we_out = mem_write;

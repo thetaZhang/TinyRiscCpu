@@ -27,11 +27,12 @@ wire                       carry;
 wire                       overflow;
 wire                       zero;
 wire [`DATA_WIDTH - 1 : 0] data_out;
+wire [`DATA_WIDTH - 1 : 0] rs2_data;
 
-
+assign rs2_data = (pc_sel_in == `PC_JUMP_R) ? imm_in : rs2_data_in;
 
 assign in_2_inv = (pc_alu_op_in == `ALU_LT) || (pc_alu_op_in == `ALU_LTU) || (pc_alu_op_in == `ALU_SUB);
-assign data_in_2 = (in_2_inv) ? (~rs2_data_in + 1'b1) : rs2_data_in;
+assign data_in_2 = (in_2_inv) ? (~rs2_data + 1'b1) : rs2_data;
 assign {carry, res_alu} = rs1_data_in + data_in_2;
 assign overflow = (rs1_data_in[`DATA_WIDTH - 1] == data_in_2[`DATA_WIDTH - 1]) && (res_alu[`DATA_WIDTH - 1] != rs1_data_in[`DATA_WIDTH - 1]);
 assign res_lt = (rs2_data_in == {1'b1,{(`DATA_WIDTH - 1){1'b0}}}) ? 1'b0 :

@@ -18,7 +18,8 @@ module BranchPredictor #(
   input [ADDR_WIDTH - 1 : 0] target_update_in,
 
   output [ADDR_WIDTH - 1 : 0]pc_next_out,
-  output is_taken_next_out
+  output is_taken_next_out,
+  output btb_hit_out
 );
 
 wire bht_update_en;
@@ -34,7 +35,6 @@ wire btb_valid[0 : BTB_SIZE - 1];
 
 wire [BTB_ADDR_WIDTH - 1 : 0] btb_query_entry;
 wire [BTB_ADDR_WIDTH - 1 : 0] btb_update_entry;
-wire btb_hit;
 
 
 assign bht_update_en = (pc_update_sel_in == `PC_BRANCH);
@@ -61,9 +61,8 @@ endgenerate
 
 // BHT query
 // noy predict Jalr, if Jalr, set not taken
-assign is_taken_next_out = (!btb_hit) ? 1'b0 :
-                           (pc_query_sel_in == `PC_JUMP) ? 1'b1 :
-                           (pc_query_sel_in == `PC_JUMP_R) ? 1'b0 :
+assign is_taken_next_out = (pc_query_sel_in == `PC_JUMP) ? 1'b1 :
+                           (pc_query_sel_in == `PC_JUMP_R) ? 1'b1 :
                            (pc_query_sel_in == `PC_BRANCH) ? (bht[bht_query_entry] >= 2'b10) :
                            (pc_query_sel_in == `PC_PLUS4) ? 1'b0 : 1'b0;
 
@@ -79,7 +78,7 @@ generate
   end
 endgenerate
 
-assign btb_hit = btb_valid[btb_query_entry];
+assign btb_hit_out = (btb_valid[btb_query_entry]) && (~(pc_query_sel_in == `PC_JUMP_R));
 
 assign pc_next_out = btb_target[btb_query_entry];
 

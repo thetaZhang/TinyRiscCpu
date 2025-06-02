@@ -3,21 +3,25 @@
 `define EX_HZD_1 (id_ex_pc_sel_in == `PC_PLUS4) && \
                  (ex_mem_reg_we_in) && \
                  (ex_mem_rd_in != 0) && \
+                 (id_ex_reg_use_in) && \
                  ((ex_mem_rd_in == id_ex_rs1_addr_in))
 `define EX_HZD_2 (id_ex_pc_sel_in == `PC_PLUS4) && \
                  (ex_mem_reg_we_in) && \
                  (ex_mem_rd_in != 0) && \
+                 (id_ex_reg_use_in) && \
                  ((ex_mem_rd_in == id_ex_rs2_addr_in))
 
 `define MEM_HZD_1 (id_ex_pc_sel_in == `PC_PLUS4) && \
                   (mem_wb_reg_we_in) && \
                   (mem_wb_rd_in != 0) && \
                   (!(`EX_HZD_1)) && \
+                  (id_ex_reg_use_in) && \
                   ((mem_wb_rd_in == id_ex_rs1_addr_in))
 `define MEM_HZD_2 (id_ex_pc_sel_in == `PC_PLUS4) && \
                   (mem_wb_reg_we_in) && \
                   (mem_wb_rd_in != 0) && \
                   (!(`EX_HZD_2)) && \
+                  (id_ex_reg_use_in) && \
                   ((mem_wb_rd_in == id_ex_rs2_addr_in))
 
 `define MEM_STR_HZD (mem_wb_reg_we_in) && \
@@ -30,10 +34,12 @@
 `define ID_BRC_HZD_1 (if_id_pc_sel_in != `PC_PLUS4) && \
                      (ex_mem_reg_we_in) && \
                      (ex_mem_rd_in != 0) && \
+                     (if_id_reg_use_in) && \
                      ((ex_mem_rd_in == if_id_rs1_addr_in))
 `define ID_BRC_HZD_2 (if_id_pc_sel_in != `PC_PLUS4) && \
                      (ex_mem_reg_we_in) && \
                      (ex_mem_rd_in != 0) && \
+                     (if_id_reg_use_in) && \
                      ((ex_mem_rd_in == if_id_rs2_addr_in))
 
 module tinyrisc_Forwarding(
@@ -41,6 +47,8 @@ module tinyrisc_Forwarding(
     input [`PC_SEL_WIDTH - 1 : 0]   if_id_pc_sel_in,
     input [`REG_ADDR_WIDTH - 1 : 0] ex_mem_rd_in,
     input [`REG_ADDR_WIDTH - 1 : 0] mem_wb_rd_in,
+    input                           if_id_reg_use_in,
+    input                           id_ex_reg_use_in,
     input [`REG_ADDR_WIDTH - 1 : 0] if_id_rs1_addr_in,
     input [`REG_ADDR_WIDTH - 1 : 0] if_id_rs2_addr_in,
     input [`REG_ADDR_WIDTH - 1 : 0] id_ex_rs1_addr_in,
