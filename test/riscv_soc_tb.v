@@ -5,6 +5,9 @@ module riscv_soc_tb ();
   reg           clk;
   reg           rst;
 
+  wire        data_ce;
+  wire        data_we;
+
   wire [31 : 0] reg_file_probe[0 : 31];
 
   task print_registers;
@@ -90,8 +93,7 @@ module riscv_soc_tb ();
   wire [31:0] inst;
   wire        inst_ce;
 
-  wire        data_ce;
-  wire        data_we;
+
   wire [31:0] data_addr;
   wire [31:0] wdata;
   wire [31:0] rdata;
