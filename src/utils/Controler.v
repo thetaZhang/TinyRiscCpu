@@ -1,5 +1,5 @@
 // main controller
-
+`include "GlobalDefine.vh"
 `define R_TYPE_INPUT ((inst_in & `R_TYPE_MASK) == `INST_ADD) || \
                      ((inst_in & `R_TYPE_MASK) == `INST_SUB) || \
                      ((inst_in & `R_TYPE_MASK) == `INST_AND) || \

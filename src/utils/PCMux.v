@@ -1,5 +1,5 @@
 // next PC mux
-
+`include "GlobalDefine.vh"
 module PCMux #(
   parameter ADDR_WIDTH = 32,
   parameter DATA_WIDTH = 32

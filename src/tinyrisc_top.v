@@ -1,5 +1,5 @@
 // top of the tinyrisc CPU
-
+`include "GlobalDefine.vh"
 module tinyrisc_top (
     input                        clk,
     input                        rst_n,

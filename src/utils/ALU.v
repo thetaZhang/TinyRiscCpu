@@ -1,5 +1,5 @@
 // Arithmetic Logical Unit
-
+`include "GlobalDefine.vh"
 module ALU #(
     parameter DATA_WIDTH = 32
 )(

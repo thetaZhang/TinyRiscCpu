@@ -1,5 +1,5 @@
 // instruction decode
-
+`include "GlobalDefine.vh"
 module tinyrisc_ID (
     input clk,
     input rst_n,
