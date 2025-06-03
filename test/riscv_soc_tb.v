@@ -61,6 +61,16 @@ module riscv_soc_tb ();
     forever #50 clk = ~clk;
   end
 
+  always @(posedge clk) begin
+    if (data_ce) begin
+      if (data_we) begin
+        $display("Write to memory at address %h with data %h", data_addr, wdata);
+      end else begin
+        $display("Read from memory at address %h, received data %h", data_addr, rdata);
+      end
+    end
+  end
+
   initial begin
     rst = 1'b1;
     #300 rst = 1'b0;
