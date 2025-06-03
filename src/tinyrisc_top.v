@@ -20,6 +20,7 @@ module tinyrisc_top (
   wire [`ALU_OP_WIDTH - 1 : 0] alu_op;
   wire                         alu_zero_preset;
   wire [  `DATA_WIDTH - 1 : 0] rs1_data;
+  wire [  `DATA_WIDTH - 1 : 0] rs1_data_in;
   wire [  `DATA_WIDTH - 1 : 0] rs2_data;
   wire [  `DATA_WIDTH - 1 : 0] rd_data;
   wire [  `DATA_WIDTH - 1 : 0] imm;
@@ -62,12 +63,12 @@ module tinyrisc_top (
       .mem_to_reg_out (mem_to_reg),
       .alu_zero_preset(alu_zero_preset)
   );
-
+  assign rs1_data_in =((inst_in & `U_TYPE_MASK) == `INST_AUIPC) ?  pc : rs1_data;
   // EX
   tinyrisc_EX EX_u (
       .clk            (clk),
       .rst_n          (rst_n),
-      .rs1_data_in    (rs1_data),
+      .rs1_data_in    (rs1_data_in),
       .rs2_data_in    (rs2_data),
       .imm_in         (imm),
       .alu_op_in      (alu_op),

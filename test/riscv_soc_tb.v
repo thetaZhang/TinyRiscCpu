@@ -68,6 +68,11 @@ endtask
     print_registers();
     print_memory(0, 32);
     dump_memory_to_file(0, 1024);
+    if (reg_file_probe[27] != 32'h1) begin
+      $display ("==========Error==========");
+    end else begin
+      $display ("==========Success==========");
+    end
     #1000 $finish;
   end
        

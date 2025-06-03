@@ -14,10 +14,13 @@
 `define S_TYPE_INPUT ((inst_in & `S_TYPE_MASK) == `INST_SW  )
 
 `define B_TYPE_INPUT ((inst_in & `B_TYPE_MASK) == `INST_BLT) || \
+                     ((inst_in & `B_TYPE_MASK) == `INST_BNE) || \
                      ((inst_in & `B_TYPE_MASK) == `INST_BEQ)
 
-`define U_TYPE_INPUT ((inst_in & `U_TYPE_MASK) == `INST_JAL)
 
+`define U_TYPE_INPUT ((inst_in & `U_TYPE_MASK) == `INST_JAL) || \
+                     ((inst_in & `U_TYPE_MASK) == `INST_LUI) || \
+                     ((inst_in & `U_TYPE_MASK) == `INST_AUIPC)
 
 module Controler #(
   parameter INST_WIDTH = 32,
@@ -55,8 +58,9 @@ assign is_reg_write = (`R_TYPE_INPUT) ? 1'b1 :
                       (`B_TYPE_INPUT) ? 1'b0 :
                       (`U_TYPE_INPUT) ? 1'b1 : 1'b0;
 
-assign PC_sel = (`B_TYPE_INPUT) ? `PC_BRANCH :
-                (`U_TYPE_INPUT) ? `PC_JUMP : `PC_PLUS4;
+  assign PC_sel = (`B_TYPE_INPUT) ? `PC_BRANCH :
+                ((inst_in & `I_TYPE_MASK) == `INST_JAL) ? `PC_JUMP :
+                ((inst_in & `I_TYPE_MASK) == `INST_JALR) ?`PC_JUMP_R : `PC_PLUS4;
 
 assign alu_op = ((inst_in & `R_TYPE_MASK) == `INST_ADD) ? `ALU_ADD :
                 ((inst_in & `R_TYPE_MASK) == `INST_SUB) ? `ALU_SUB :
@@ -69,10 +73,14 @@ assign alu_op = ((inst_in & `R_TYPE_MASK) == `INST_ADD) ? `ALU_ADD :
                 ((inst_in & `I_TYPE_MASK) == `INST_LW) ? `ALU_ADD :
                 ((inst_in & `B_TYPE_MASK) == `INST_BLT) ? `ALU_LT  :
                 ((inst_in & `B_TYPE_MASK) == `INST_BEQ) ? `ALU_SUB :
+                ((inst_in & `B_TYPE_MASK) == `INST_BNE) ? `ALU_SUB :
                 ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? `ALU_NONE :
-                ((inst_in & `S_TYPE_MASK) == `INST_SW) ? `ALU_ADD : `ALU_NONE;
+                ((inst_in & `S_TYPE_MASK) == `INST_SW) ? `ALU_ADD :
+                ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? `ALU_NONE :
+                ((inst_in & `U_TYPE_MASK) == `INST_AUIPC) ? `ALU_ADD : `ALU_NONE;
 
 assign alu_zero_preset = ((inst_in & `B_TYPE_MASK) == `INST_BEQ) ? 1'b1 :
+                         ((inst_in & `B_TYPE_MASK) == `INST_BNE) ? 1'b0 :
                          ((inst_in & `B_TYPE_MASK) == `INST_BLT) ? 1'b0 : 1'b0;
 
 endmodule

@@ -64,7 +64,8 @@ assign less_than = (data_in_2 == {1'b1,{(DATA_WIDTH - 1){1'b0}}}) ? 1'b0 :
                    (~overflow) ? res_add_sub[DATA_WIDTH - 1] : in_1[DATA_WIDTH - 1];
 assign less_than_unsigned = (|data_in_2) && (~carry);
 
-assign data_out = (op_ctrl == ADD) ? res_add_sub :
+assign data_out = (op_ctrl == NONE) ? data_in_2 :
+                  (op_ctrl == ADD) ? res_add_sub :
                   (op_ctrl == SUB) ? res_add_sub :
                   (op_ctrl == AND) ? res_and :
                   (op_ctrl == OR)  ? res_or :
