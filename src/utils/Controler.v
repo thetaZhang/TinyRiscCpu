@@ -90,7 +90,7 @@ module Controler #(
                       (`U_TYPE_INPUT) ? 1'b1 : 1'b0;
 
   assign PC_sel = (`B_TYPE_INPUT) ? `PC_BRANCH :
-                ((inst_in & `I_TYPE_MASK) == `INST_JAL) ? `PC_JUMP :
+                ((inst_in & `U_TYPE_MASK) == `INST_JAL) ? `PC_JUMP :
                 ((inst_in & `I_TYPE_MASK) == `INST_JALR) ?`PC_JUMP_R : `PC_PLUS4;
 
   assign alu_op = ((inst_in & `R_TYPE_MASK) == `INST_ADD) ? `ALU_ADD :

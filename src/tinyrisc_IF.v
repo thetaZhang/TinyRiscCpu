@@ -1,8 +1,8 @@
 // instruction fetch
 `include "GlobalDefine.vh"
 
-`define BHT_SIZE  1024
-`define BTB_SIZE  1024
+`define BHT_SIZE  256
+`define BTB_SIZE  256
 
 module tinyrisc_IF (
     input                        clk,
