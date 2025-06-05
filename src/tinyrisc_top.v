@@ -90,6 +90,8 @@ module tinyrisc_top (
   wire                           reg_we_ex;
   wire [     `FWD_WIDTH - 1 : 0] rs1_fwd_ex;
   wire [     `FWD_WIDTH - 1 : 0] rs2_fwd_ex;
+  wire [     `FWD_WIDTH - 1 : 0] rs1_fwd_ex_reg;
+  wire [     `FWD_WIDTH - 1 : 0] rs2_fwd_ex_reg;
   wire [    `ADDR_WIDTH - 1 : 0] pc_ex;
   wire [  `PC_SEL_WIDTH - 1 : 0] pc_sel_ex;
   wire [    `ADDR_WIDTH - 1 : 0] pc_next_ex;
@@ -319,17 +321,15 @@ module tinyrisc_top (
 
   // EX and MEM forwarding & ID branch forwarding
   tinyrisc_Forwarding Forwarding_u (
-      .id_ex_pc_sel_in     (pc_sel_ex),
       .if_id_pc_sel_in     (pc_sel_id),
+      .id_ex_rd_in         (rd_addr_ex),
       .ex_mem_rd_in        (rd_addr_mem),
       .mem_wb_rd_in        (rd_addr_wb),
       .if_id_reg_use_in    (reg_use_id),
-      .id_ex_reg_use_in    (reg_use_ex),
       .if_id_rs1_addr_in   (rs1_addr_id),
       .if_id_rs2_addr_in   (rs2_addr_id),
-      .id_ex_rs1_addr_in   (rs1_addr_ex),
-      .id_ex_rs2_addr_in   (rs2_addr_ex),
       .ex_mem_rs2_addr_in  (rs2_addr_mem),
+      .id_ex_reg_we_in     (reg_we_ex),
       .ex_mem_reg_we_in    (reg_we_mem),
       .mem_wb_reg_we_in    (reg_we_wb),
       .mem_wb_mem_to_reg_in(mem_to_reg_wb),
@@ -337,9 +337,16 @@ module tinyrisc_top (
       .ex_mem_data_ce_in   (data_ce_mem),
       .id_rs1_fwd_out      (rs1_fwd_id),
       .id_rs2_fwd_out      (rs2_fwd_id),
-      .ex_rs1_fwd_out      (rs1_fwd_ex),
-      .ex_rs2_fwd_out      (rs2_fwd_ex),
+      .ex_rs1_fwd_out      (rs1_fwd_ex_reg),
+      .ex_rs2_fwd_out      (rs2_fwd_ex_reg),
       .mem_rs2_fwd_out     (rs2_fwd_mem)
+  );
+
+  DffNegRst #(2 * `FWD_WIDTH) fwd_ex_reg_u (
+      .clk  (clk),
+      .rst_n(rst_n),
+      .d    ({rs1_fwd_ex_reg, rs2_fwd_ex_reg}),
+      .q    ({rs1_fwd_ex, rs2_fwd_ex})
   );
 
   // Stalling
