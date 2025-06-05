@@ -225,9 +225,15 @@
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Flow_AreaOptimized_high" Flow="Vivado Synthesis 2018"/>
         <Step Id="synth_design">
+<<<<<<< HEAD
           <Option Id="ReTiming">1</Option>
           <Option Id="Directive">1</Option>
           <Option Id="ControlSetOptThreshold">1</Option>
+=======
+          <Option Id="ControlSetOptThreshold">1</Option>
+          <Option Id="ReTiming">1</Option>
+          <Option Id="Directive">1</Option>
+>>>>>>> fix-alu
         </Step>
       </Strategy>
       <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
@@ -238,13 +244,24 @@
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Flow_PerfOptimized_high" Flow="Vivado Synthesis 2018"/>
         <Step Id="synth_design">
+<<<<<<< HEAD
+=======
+          <Option Id="FsmExtraction">1</Option>
+          <Option Id="KeepEquivalentRegisters">1</Option>
+          <Option Id="ResourceSharing">2</Option>
+          <Option Id="NoCombineLuts">1</Option>
+          <Option Id="RepFanoutThreshold">400</Option>
+>>>>>>> fix-alu
           <Option Id="ReTiming">1</Option>
           <Option Id="KeepEquivalentRegisters">1</Option>
           <Option Id="ShregMinSize">5</Option>
+<<<<<<< HEAD
           <Option Id="FsmExtraction">1</Option>
           <Option Id="ResourceSharing">2</Option>
           <Option Id="NoCombineLuts">1</Option>
           <Option Id="RepFanoutThreshold">400</Option>
+=======
+>>>>>>> fix-alu
         </Step>
       </Strategy>
       <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>

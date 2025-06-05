@@ -17,30 +17,25 @@ module BranchGen(
   output [`DATA_WIDTH - 1 : 0] imm_out
 );
 
-
-wire [`DATA_WIDTH - 1 : 0] data_in_2;
-wire                       in_2_inv;
+wire [`DATA_WIDTH - 1 : 0] rs2_data;
+wire [`DATA_WIDTH - 1 : 0] res_add;
+wire [`DATA_WIDTH - 1 : 0] res_sub;
 wire [`DATA_WIDTH - 1 : 0] res_lt;
 wire [`DATA_WIDTH - 1 : 0] res_ltu;
-wire [`DATA_WIDTH - 1 : 0] res_alu;
-wire                       carry;
-wire                       overflow;
-wire                       zero;
 wire [`DATA_WIDTH - 1 : 0] data_out;
-wire [`DATA_WIDTH - 1 : 0] rs2_data;
+wire                       zero;
+
+
 
 assign rs2_data = (pc_sel_in == `PC_JUMP_R) ? imm_in : rs2_data_in;
 
-assign in_2_inv = (pc_alu_op_in == `ALU_LT) || (pc_alu_op_in == `ALU_LTU) || (pc_alu_op_in == `ALU_SUB);
-assign data_in_2 = (in_2_inv) ? (~rs2_data + 1'b1) : rs2_data;
-assign {carry, res_alu} = rs1_data_in + data_in_2;
-assign overflow = (rs1_data_in[`DATA_WIDTH - 1] == data_in_2[`DATA_WIDTH - 1]) && (res_alu[`DATA_WIDTH - 1] != rs1_data_in[`DATA_WIDTH - 1]);
-assign res_lt = (rs2_data_in == {1'b1,{(`DATA_WIDTH - 1){1'b0}}}) ? 1'b0 :
-                (~overflow) ? res_alu[`DATA_WIDTH - 1] : rs1_data_in[`DATA_WIDTH - 1];
-assign res_ltu = (|rs2_data_in) && (~carry);
+assign res_add = rs1_data_in + rs2_data;
+assign res_sub = rs1_data_in - rs2_data;
+assign res_lt = ($signed(rs1_data_in) < $signed(rs2_data)) ? {{(`DATA_WIDTH - 1){1'b0}},1'b1} : {`DATA_WIDTH{1'b0}};
+assign res_ltu = (rs1_data_in < rs2_data) ? {{(`DATA_WIDTH - 1){1'b0}},1'b1} : {`DATA_WIDTH{1'b0}};
 
-assign data_out = (pc_alu_op_in == `ALU_ADD) ? res_alu :
-                 (pc_alu_op_in == `ALU_SUB) ? res_alu :
+assign data_out = (pc_alu_op_in == `ALU_ADD) ? res_add :
+                 (pc_alu_op_in == `ALU_SUB) ? res_sub :
                  (pc_alu_op_in == `ALU_LT)  ? res_lt :
                  (pc_alu_op_in == `ALU_LTU) ? res_ltu : {(`DATA_WIDTH){1'b0}};
 
