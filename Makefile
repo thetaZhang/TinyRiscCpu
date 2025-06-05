@@ -1,5 +1,6 @@
 SIMULATOR ?= iverilog
 
+TEST_OP ?= add
 
 VERILOG_SRC += $(wildcard $(PWD)/src/*.v)
 VERILOG_SRC += $(wildcard $(PWD)/src/*/*.v)
@@ -88,6 +89,18 @@ else ifeq ($(SIMULATOR), questa)
 wave: $(BIN) $(INST_PATH)
 	$(SIM_RUN) $(SIM_WAVE_ARGS)
 endif
+
+ifeq ($(SIMULATOR), iverilog)
+test: $(BIN) $(INST_PATH)
+	cp test/riscv-tests/build/rv32ui-p-$(TEST_OP).verilog $(INST_PATH) -f
+	$(SIM_RUN) $(BUILD_DIR)/$(TOP).vvp $(SIM_RUN_ARGS)
+else ifeq ($(SIMULATOR), questa)
+test: $(BIN) $(INST_PATH)
+	cp test/riscv-tests/build/rv32ui-p-$(TEST_OP).verilog $(INST_PATH) -f
+	$(SIM_RUN) $(SIM_ARGS)
+endif
+
+
 
 clean:
 	rm -f  $(BUILD_DIR)/*

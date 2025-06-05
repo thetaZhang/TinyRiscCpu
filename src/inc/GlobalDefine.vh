@@ -15,6 +15,8 @@
 `define B_TYPE_MASK 32'h707f
 `define U_TYPE_MASK 32'h7f
 
+`define I_TYPE_SHF_MASK 32'hfc00707f
+
 // opcodes
 // R-type instructions
 `define INST_ADD 32'h33
