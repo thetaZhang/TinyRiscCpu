@@ -31,10 +31,12 @@ wire [BHT_ADDR_WIDTH - 1 : 0] bht_query_entry;
 wire [BHT_ADDR_WIDTH - 1 : 0] bht_update_entry;
 
 wire [ADDR_WIDTH - 1 : 0] btb_target[0 : BTB_SIZE - 1];
+wire [ADDR_WIDTH - BTB_ADDR_WIDTH - 1 : 0] btb_tag[0 : BTB_SIZE - 1];
 wire btb_valid[0 : BTB_SIZE - 1];
 
 wire [BTB_ADDR_WIDTH - 1 : 0] btb_query_entry;
 wire [BTB_ADDR_WIDTH - 1 : 0] btb_update_entry;
+wire [ADDR_WIDTH - BTB_ADDR_WIDTH - 1 : 0] btb_update_tag;
 
 
 assign bht_update_en = (pc_update_sel_in == `PC_BRANCH);
@@ -44,7 +46,7 @@ assign bht_update_entry = pc_update_in[BHT_ADDR_WIDTH - 1 + 2 : 2];
 assign btb_update_en = (pc_update_sel_in == `PC_BRANCH) || (pc_update_sel_in == `PC_JUMP);
 assign btb_query_entry = pc_query_in[BTB_ADDR_WIDTH - 1 + 2 : 2];
 assign btb_update_entry = pc_update_in[BTB_ADDR_WIDTH - 1 + 2 : 2];
-
+assign btb_update_tag = pc_update_in[ADDR_WIDTH - 1 : BTB_ADDR_WIDTH];
 
 // BHT
 // BHT update
@@ -72,13 +74,13 @@ assign is_taken_next_out = (pc_query_sel_in == `PC_JUMP) ? 1'b1 :
 
 generate
   for (i = 0; i < BTB_SIZE; i = i + 1) begin : gen_btb
-    wire [ADDR_WIDTH : 0] btb_next;
-    assign btb_next = (btb_update_entry != i) ? {btb_valid[i], btb_target[i]} : {1'b1, target_update_in};
-    DffNegRstEn #(1 + ADDR_WIDTH) btb_target_reg_u (clk, rst_n, btb_update_en, btb_next, {btb_valid[i], btb_target[i]});
+    wire [ADDR_WIDTH + ADDR_WIDTH - BTB_ADDR_WIDTH : 0] btb_next;
+    assign btb_next = (btb_update_entry != i) ? {btb_valid[i], btb_tag[i], btb_target[i]} : {1'b1, btb_update_tag, target_update_in};
+    DffNegRstEn #(1 + ADDR_WIDTH - BTB_ADDR_WIDTH + ADDR_WIDTH) btb_target_reg_u (clk, rst_n, btb_update_en, btb_next, {btb_valid[i], btb_tag[i], btb_target[i]});
   end
 endgenerate
 
-assign btb_hit_out = (btb_valid[btb_query_entry]) && (~(pc_query_sel_in == `PC_JUMP_R));
+assign btb_hit_out = (btb_valid[btb_query_entry]) && (btb_tag[btb_query_entry] == btb_update_tag) && (~(pc_query_sel_in == `PC_JUMP_R));
 
 assign pc_next_out = btb_target[btb_query_entry];
 
