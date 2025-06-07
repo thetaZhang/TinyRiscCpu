@@ -58,12 +58,12 @@ endtask
 
   initial begin
     clk = 1'b0;
-    forever #50 clk = ~clk;
+    forever #5 clk = ~clk;
   end
       
   initial begin
     rst = 1'b1;
-    #300 rst= 1'b0;
+    #30 rst= 1'b0;
     #100000 $display("---     result is %d         ---\n", verify);
     print_registers();
     print_memory(0, 32);

@@ -34,8 +34,12 @@ generate
   end
 endgenerate
 
-assign data_rd_1 = ((addr_rd_1 == addr_wr) && reg_we_in) ? data_wr : reg_file[addr_rd_1];
-assign data_rd_2 = ((addr_rd_2 == addr_wr) && reg_we_in) ? data_wr : reg_file[addr_rd_2];
+assign data_rd_1 = (addr_rd_1 == 0) ? reg_file[0] :
+                   ((addr_rd_1 == addr_wr) && reg_we_in) ? data_wr : reg_file[addr_rd_1];
+
+
+assign data_rd_2 = (addr_rd_2 == 0) ? reg_file[0] :
+                   ((addr_rd_2 == addr_wr) && reg_we_in) ? data_wr : reg_file[addr_rd_2];
 
 
 endmodule

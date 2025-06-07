@@ -1,7 +1,7 @@
-addi x1,x0,10
-sw x1,0(x0)
-lw x2,0(x0)
-jal x3,loop
-addi x3,x3,8
+addi x3, x0, 100
 loop:
-addi x3,x3,1
+  addi x1, x1, 1
+  add x2,x2, x1
+  blt x1, x3, loop
+addi x0, x0, 0
+addi x0, x0, 0
